@@ -11,7 +11,7 @@ interface GuestListProps {
   onGuestUpdate: () => void;
 }
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 8;
 
 export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,12 +27,12 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
 
   if (guests.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="rounded-full bg-muted p-6 mb-4">
-          <Users className="h-12 w-12 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-center h-full">
+        <div className="rounded-full bg-muted p-4 sm:p-6 mb-3 sm:mb-4">
+          <Users className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">Belum ada tamu</h3>
-        <p className="text-muted-foreground max-w-sm">
+        <h3 className="text-base sm:text-lg font-semibold mb-2">Belum ada tamu</h3>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-sm px-4">
           Belum ada tamu yang terdaftar. Tambahkan tamu pertama dengan mengklik tombol Tambah Tamu.
         </p>
       </div>
@@ -40,9 +40,9 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 h-full flex flex-col">
       {/* Guest Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 flex-1 overflow-y-auto">
         {currentGuests.map((guest) => (
           <GuestCard 
             key={guest.id} 
@@ -54,20 +54,21 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 border-t">
+          <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
             Menampilkan {startIndex + 1}-{Math.min(endIndex, guests.length)} dari {guests.length} tamu
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
+              className="h-8 px-2 sm:px-3"
             >
-              <ChevronLeft className="h-4 w-4" />
-              Sebelumnya
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline ml-1">Sebelumnya</span>
             </Button>
             
             <div className="flex items-center gap-1">
@@ -77,7 +78,7 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
                   variant={currentPage === page ? "default" : "outline"}
                   size="sm"
                   onClick={() => goToPage(page)}
-                  className="w-8 h-8 p-0"
+                  className="w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs sm:text-sm"
                 >
                   {page}
                 </Button>
@@ -89,9 +90,10 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
               size="sm"
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className="h-8 px-2 sm:px-3"
             >
-              Selanjutnya
-              <ChevronRight className="h-4 w-4" />
+              <span className="hidden sm:inline mr-1">Selanjutnya</span>
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>

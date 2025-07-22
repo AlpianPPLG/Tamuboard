@@ -47,7 +47,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header
         searchValue={searchValue}
         onSearchChange={setSearchValue}
@@ -56,23 +56,25 @@ export default function Home() {
         onGuestAdded={handleGuestUpdate}
       />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
+      <main className="flex-1 w-full px-3 sm:px-4 py-4 sm:py-6 overflow-hidden">
+        <div className="space-y-4 sm:space-y-6 h-full">
           {/* Summary */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
             <div>
-              <h2 className="text-2xl font-bold">Daftar Tamu</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-xl sm:text-2xl font-bold">Daftar Tamu</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {filteredGuests.length} dari {guests.length} tamu
               </p>
             </div>
           </div>
 
           {/* Guest List */}
-          <GuestList 
-            guests={filteredGuests} 
-            onGuestUpdate={handleGuestUpdate}
-          />
+          <div className="flex-1 overflow-hidden">
+            <GuestList 
+              guests={filteredGuests} 
+              onGuestUpdate={handleGuestUpdate}
+            />
+          </div>
         </div>
       </main>
     </div>

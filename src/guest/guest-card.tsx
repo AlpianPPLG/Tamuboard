@@ -84,19 +84,19 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
 
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+      <Card className="hover:shadow-md transition-shadow h-fit">
+        <CardHeader className="pb-2 sm:pb-3">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {getGuestInitials(guest.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold truncate">{guest.name}</h3>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Building className="h-3 w-3" />
+                <h3 className="text-sm sm:text-base font-semibold truncate">{guest.name}</h3>
+                <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                  <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
                   <span className="truncate">{guest.institution}</span>
                 </div>
               </div>
@@ -104,22 +104,22 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
+                <Button variant="ghost" size="sm" className="h-6 w-6 sm:h-8 sm:w-8 p-0 flex-shrink-0">
+                  <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowDetailDialog(true)}>
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                   Lihat Detail
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-                  <Edit className="mr-2 h-4 w-4" />
+                  <Edit className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                   Edit Data
                 </DropdownMenuItem>
                 {guest.status === 'checked-in' && (
                   <DropdownMenuItem onClick={handleCheckOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                     Check Out
                   </DropdownMenuItem>
                 )}
@@ -127,7 +127,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
                   onClick={() => setShowDeleteDialog(true)}
                   variant="destructive"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                   Hapus
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -135,30 +135,30 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 sm:space-y-3">
           <div className="flex items-center justify-between">
             <Badge className={getStatusColor(guest.status)}>
               {getStatusText(guest.status)}
             </Badge>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
+              <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               {guest.checkInTime}
             </div>
           </div>
 
-          <div className="space-y-2 text-sm">
+          <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
             <div>
               <span className="text-muted-foreground">Keperluan:</span>
-              <p className="font-medium truncate">{guest.purpose}</p>
+              <p className="font-medium truncate text-xs sm:text-sm">{guest.purpose}</p>
             </div>
             
             <div className="flex items-center gap-1 text-muted-foreground">
-              <Phone className="h-3 w-3" />
+              <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
               <span className="truncate">{guest.phone}</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t">
+          <div className="pt-1 sm:pt-2 border-t">
             <p className="text-xs text-muted-foreground">
               {formatDate(guest.visitDate)}
             </p>
@@ -176,7 +176,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[95vw] max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>Edit Data Tamu</DialogTitle>
           </DialogHeader>
@@ -190,7 +190,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[95vw] max-w-md mx-auto">
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus Data Tamu</AlertDialogTitle>
             <AlertDialogDescription>

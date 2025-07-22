@@ -60,23 +60,23 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] max-w-md mx-auto">
         <DialogHeader>
           <DialogTitle>Filter & Urutkan</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Date Range */}
           <div className="space-y-2">
             <Label>Rentang Tanggal</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="justify-start text-left font-normal"
+                    className="justify-start text-left font-normal h-9 text-sm"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                     {localFilters.dateFrom
                       ? format(localFilters.dateFrom, 'dd MMM yyyy', { locale: id })
                       : 'Dari'}
@@ -98,9 +98,9 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="justify-start text-left font-normal"
+                    className="justify-start text-left font-normal h-9 text-sm"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    <CalendarIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                     {localFilters.dateTo
                       ? format(localFilters.dateTo, 'dd MMM yyyy', { locale: id })
                       : 'Sampai'}
@@ -131,7 +131,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
                 }
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -145,7 +145,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
           {/* Sort Options */}
           <div className="space-y-2">
             <Label>Urutkan Berdasarkan</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <Select
                 value={localFilters.sortBy}
                 onValueChange={(value: string) => {
@@ -154,7 +154,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,7 +172,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -184,9 +184,9 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 flex-col sm:flex-row">
           <Button variant="outline" onClick={handleReset}>
-            <RotateCcw className="mr-2 h-4 w-4" />
+            <RotateCcw className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             Reset
           </Button>
           <Button onClick={handleApply}>Terapkan Filter</Button>

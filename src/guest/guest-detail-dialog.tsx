@@ -98,7 +98,7 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Detail Tamu</DialogTitle>
@@ -106,24 +106,25 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
               variant="outline"
               size="sm"
               onClick={() => setShowEditForm(true)}
+              className="h-8"
             >
-              <Edit className="h-4 w-4 mr-2" />
+              <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Edit
             </Button>
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header with Avatar and Status */}
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Avatar className="h-12 w-12 sm:h-16 sm:w-16 flex-shrink-0">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm sm:text-lg">
                 {getGuestInitials(guest.name)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold">{guest.name}</h3>
-              <p className="text-muted-foreground">{guest.institution}</p>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold truncate">{guest.name}</h3>
+              <p className="text-sm sm:text-base text-muted-foreground truncate">{guest.institution}</p>
               <Badge className={`mt-2 ${getStatusColor(guest.status)}`}>
                 {getStatusText(guest.status)}
               </Badge>
@@ -133,17 +134,17 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
           <Separator />
 
           {/* Guest Details */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {detailItems.map((item, index) => {
               const IconComponent = item.icon;
               return (
-                <div key={index} className="flex items-start gap-3">
-                  <IconComponent className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                <div key={index} className="flex items-start gap-2 sm:gap-3">
+                  <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-muted-foreground">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       {item.label}
                     </p>
-                    <p className="text-sm break-words">{item.value}</p>
+                    <p className="text-sm sm:text-base break-words">{item.value}</p>
                   </div>
                 </div>
               );
@@ -153,32 +154,32 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
           <Separator />
 
           {/* Visit Information */}
-          <div className="space-y-4">
-            <h4 className="font-medium">Informasi Kunjungan</h4>
+          <div className="space-y-3 sm:space-y-4">
+            <h4 className="text-sm sm:text-base font-medium">Informasi Kunjungan</h4>
             
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Tanggal Kunjungan</p>
-                  <p className="text-sm">{formatDate(guest.visitDate)}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Tanggal Kunjungan</p>
+                  <p className="text-sm sm:text-base">{formatDate(guest.visitDate)}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <LogIn className="h-4 w-4 text-green-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <LogIn className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Waktu Check In</p>
-                  <p className="text-sm">{guest.checkInTime}</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Waktu Check In</p>
+                  <p className="text-sm sm:text-base">{guest.checkInTime}</p>
                 </div>
               </div>
 
               {guest.checkOutTime && (
-                <div className="flex items-center gap-3">
-                  <LogOut className="h-4 w-4 text-red-600" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Waktu Check Out</p>
-                    <p className="text-sm">{guest.checkOutTime}</p>
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">Waktu Check Out</p>
+                    <p className="text-sm sm:text-base">{guest.checkOutTime}</p>
                   </div>
                 </div>
               )}
