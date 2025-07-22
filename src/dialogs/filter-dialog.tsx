@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -59,14 +59,12 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Filter & Urutkan</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Date Range */}
           <div className="space-y-2">
@@ -74,20 +72,23 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
             <div className="grid grid-cols-2 gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-left font-normal">
+                  <Button
+                    variant="outline"
+                    className="justify-start text-left font-normal"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {localFilters.dateFrom ? (
-                      format(localFilters.dateFrom, "dd MMM yyyy", { locale: id })
-                    ) : (
-                      "Dari"
-                    )}
+                    {localFilters.dateFrom
+                      ? format(localFilters.dateFrom, 'dd MMM yyyy', { locale: id })
+                      : 'Dari'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={localFilters.dateFrom}
-                    onSelect={(date) => setLocalFilters(prev => ({ ...prev, dateFrom: date }))}
+                    onSelect={(date?: Date) =>
+                      setLocalFilters((prev) => ({ ...prev, dateFrom: date }))
+                    }
                     initialFocus
                   />
                 </PopoverContent>
@@ -95,20 +96,23 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-left font-normal">
+                  <Button
+                    variant="outline"
+                    className="justify-start text-left font-normal"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {localFilters.dateTo ? (
-                      format(localFilters.dateTo, "dd MMM yyyy", { locale: id })
-                    ) : (
-                      "Sampai"
-                    )}
+                    {localFilters.dateTo
+                      ? format(localFilters.dateTo, 'dd MMM yyyy', { locale: id })
+                      : 'Sampai'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
                     selected={localFilters.dateTo}
-                    onSelect={(date) => setLocalFilters(prev => ({ ...prev, dateTo: date }))}
+                    onSelect={(date?: Date) =>
+                      setLocalFilters((prev) => ({ ...prev, dateTo: date }))
+                    }
                     initialFocus
                   />
                 </PopoverContent>
@@ -121,7 +125,11 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
             <Label>Status</Label>
             <Select
               value={localFilters.status}
-              onValueChange={(value: any) => setLocalFilters(prev => ({ ...prev, status: value }))}
+              onValueChange={(value: string) => {
+                if (value === 'all' || value === 'checked-in' || value === 'checked-out') {
+                  setLocalFilters((prev) => ({ ...prev, status: value }));
+                }
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -140,7 +148,11 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
             <div className="grid grid-cols-2 gap-2">
               <Select
                 value={localFilters.sortBy}
-                onValueChange={(value: any) => setLocalFilters(prev => ({ ...prev, sortBy: value }))}
+                onValueChange={(value: string) => {
+                  if (value === 'date' || value === 'name' || value === 'institution') {
+                    setLocalFilters((prev) => ({ ...prev, sortBy: value }));
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -154,7 +166,11 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
 
               <Select
                 value={localFilters.sortOrder}
-                onValueChange={(value: any) => setLocalFilters(prev => ({ ...prev, sortOrder: value }))}
+                onValueChange={(value: string) => {
+                  if (value === 'asc' || value === 'desc') {
+                    setLocalFilters((prev) => ({ ...prev, sortOrder: value }));
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -173,9 +189,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
             <RotateCcw className="mr-2 h-4 w-4" />
             Reset
           </Button>
-          <Button onClick={handleApply}>
-            Terapkan Filter
-          </Button>
+          <Button onClick={handleApply}>Terapkan Filter</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
