@@ -26,7 +26,6 @@ import {
   Mail, 
   MessageSquare, 
   Calendar, 
-  Clock,
   LogIn,
   LogOut,
   Edit

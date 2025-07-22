@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,6 @@ import {
   TrendingUp, 
   Clock,
   UserCheck,
-  UserX
 } from 'lucide-react';
 
 interface StatsDialogProps {

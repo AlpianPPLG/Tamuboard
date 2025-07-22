@@ -1,15 +1,18 @@
 import { Guest, FilterOptions } from '@/types/guest';
 
+type SortableValue = string | number;
+
 export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
   let filtered = [...guests];
 
   // Search filter
   if (filters.search) {
     const searchLower = filters.search.toLowerCase();
-    filtered = filtered.filter(guest =>
-      guest.name.toLowerCase().includes(searchLower) ||
-      guest.institution.toLowerCase().includes(searchLower) ||
-      guest.purpose.toLowerCase().includes(searchLower)
+    filtered = filtered.filter(
+      (guest) =>
+        guest.name.toLowerCase().includes(searchLower) ||
+        guest.institution.toLowerCase().includes(searchLower) ||
+        guest.purpose.toLowerCase().includes(searchLower)
     );
   }
 
@@ -17,23 +20,24 @@ export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
   if (filters.dateFrom) {
     const fromDate = new Date(filters.dateFrom);
     fromDate.setHours(0, 0, 0, 0);
-    filtered = filtered.filter(guest => guest.visitDate >= fromDate);
+    filtered = filtered.filter((guest) => guest.visitDate >= fromDate);
   }
 
   if (filters.dateTo) {
     const toDate = new Date(filters.dateTo);
     toDate.setHours(23, 59, 59, 999);
-    filtered = filtered.filter(guest => guest.visitDate <= toDate);
+    filtered = filtered.filter((guest) => guest.visitDate <= toDate);
   }
 
   // Status filter
   if (filters.status && filters.status !== 'all') {
-    filtered = filtered.filter(guest => guest.status === filters.status);
+    filtered = filtered.filter((guest) => guest.status === filters.status);
   }
 
   // Sort
   filtered.sort((a, b) => {
-    let aValue: any, bValue: any;
+    let aValue: SortableValue;
+    let bValue: SortableValue;
 
     switch (filters.sortBy) {
       case 'name':
@@ -62,7 +66,7 @@ export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
 export function getGuestInitials(name: string): string {
   return name
     .split(' ')
-    .map(word => word.charAt(0))
+    .map((word) => word.charAt(0))
     .join('')
     .toUpperCase()
     .slice(0, 2);
@@ -73,7 +77,7 @@ export function formatDate(date: Date): string {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 }
 

@@ -2,19 +2,38 @@ import { Guest, GuestStats } from '@/types/guest';
 
 const STORAGE_KEY = 'buku-tamu-guests';
 
+// Tipe hasil parsing JSON dari localStorage
+type StoredGuest = Omit<Guest, 'visitDate'> & { visitDate: string };
+
 export class GuestStorage {
   static getGuests(): Guest[] {
     if (typeof window === 'undefined') return [];
-    
+
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return [];
-      
-      const guests = JSON.parse(stored);
-      return guests.map((guest: any) => ({
-        ...guest,
-        visitDate: new Date(guest.visitDate)
-      }));
+
+      const parsed: unknown = JSON.parse(stored);
+
+      // Validasi hasil parse
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed.map((item: unknown) => {
+        if (
+          typeof item === 'object' &&
+          item !== null &&
+          'visitDate' in item &&
+          typeof (item as Record<string, unknown>).visitDate === 'string'
+        ) {
+          const raw = item as StoredGuest;
+          return {
+            ...raw,
+            visitDate: new Date(raw.visitDate),
+          };
+        }
+        // Jika struktur tidak sesuai, abaikan entri ini
+        return null;
+      }).filter((g): g is Guest => g !== null);
     } catch (error) {
       console.error('Error loading guests:', error);
       return [];
@@ -23,7 +42,7 @@ export class GuestStorage {
 
   static saveGuests(guests: Guest[]): void {
     if (typeof window === 'undefined') return;
-    
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(guests));
     } catch (error) {
@@ -31,16 +50,18 @@ export class GuestStorage {
     }
   }
 
-  static addGuest(guest: Omit<Guest, 'id' | 'visitDate' | 'checkInTime' | 'status'>): Guest {
+  static addGuest(
+    guest: Omit<Guest, 'id' | 'visitDate' | 'checkInTime' | 'status'>
+  ): Guest {
     const guests = this.getGuests();
     const newGuest: Guest = {
       ...guest,
       id: crypto.randomUUID(),
       visitDate: new Date(),
       checkInTime: new Date().toLocaleTimeString('id-ID'),
-      status: 'checked-in'
+      status: 'checked-in',
     };
-    
+
     guests.unshift(newGuest);
     this.saveGuests(guests);
     return newGuest;
@@ -48,27 +69,26 @@ export class GuestStorage {
 
   static updateGuest(id: string, updates: Partial<Guest>): Guest | null {
     const guests = this.getGuests();
-    const index = guests.findIndex(g => g.id === id);
-    
+    const index = guests.findIndex((g) => g.id === id);
     if (index === -1) return null;
-    
-    guests[index] = { 
-      ...guests[index], 
+
+    guests[index] = {
+      ...guests[index],
       ...updates,
-      // Preserve original timestamps unless explicitly updating
-      visitDate: updates.visitDate || guests[index].visitDate,
-      checkInTime: updates.checkInTime || guests[index].checkInTime
+      visitDate: updates.visitDate ?? guests[index].visitDate,
+      checkInTime: updates.checkInTime ?? guests[index].checkInTime,
     };
+
     this.saveGuests(guests);
     return guests[index];
   }
 
   static deleteGuest(id: string): boolean {
     const guests = this.getGuests();
-    const filtered = guests.filter(g => g.id !== id);
-    
+    const filtered = guests.filter((g) => g.id !== id);
+
     if (filtered.length === guests.length) return false;
-    
+
     this.saveGuests(filtered);
     return true;
   }
@@ -81,17 +101,17 @@ export class GuestStorage {
     const startOfYear = new Date(today.getFullYear(), 0, 1);
 
     return {
-      totalToday: guests.filter(g => g.visitDate >= startOfDay).length,
-      totalThisMonth: guests.filter(g => g.visitDate >= startOfMonth).length,
-      totalThisYear: guests.filter(g => g.visitDate >= startOfYear).length,
-      currentlyCheckedIn: guests.filter(g => g.status === 'checked-in').length
+      totalToday: guests.filter((g) => g.visitDate >= startOfDay).length,
+      totalThisMonth: guests.filter((g) => g.visitDate >= startOfMonth).length,
+      totalThisYear: guests.filter((g) => g.visitDate >= startOfYear).length,
+      currentlyCheckedIn: guests.filter((g) => g.status === 'checked-in').length,
     };
   }
 
   static checkOutGuest(id: string): Guest | null {
     return this.updateGuest(id, {
       status: 'checked-out',
-      checkOutTime: new Date().toLocaleTimeString('id-ID')
+      checkOutTime: new Date().toLocaleTimeString('id-ID'),
     });
   }
 }

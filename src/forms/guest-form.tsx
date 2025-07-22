@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -14,54 +14,55 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { GuestStorage } from '@/lib/guest-stotrage';
-import { Guest, GuestFormData } from '@/types/guest';
-import { toast } from 'sonner';
-import { Loader2, UserPlus } from 'lucide-react';
+} from "@/components/ui/form";
+import { GuestStorage } from "@/lib/guest-stotrage";
+import { Guest, GuestFormData } from "@/types/guest";
+import { toast } from "sonner";
+import { Loader2, UserPlus } from "lucide-react";
 
 const guestSchema = z.object({
-  name: z.string().min(2, 'Nama minimal 2 karakter'),
-  institution: z.string().min(2, 'Instansi minimal 2 karakter'),
-  purpose: z.string().min(5, 'Keperluan minimal 5 karakter'),
-  phone: z.string().min(10, 'Nomor telepon minimal 10 digit'),
-  email: z.string().email('Email tidak valid').optional().or(z.literal('')),
+  name: z.string().min(2, "Nama minimal 2 karakter"),
+  institution: z.string().min(2, "Instansi minimal 2 karakter"),
+  purpose: z.string().min(5, "Keperluan minimal 5 karakter"),
+  phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
+  email: z.string().email("Email tidak valid").optional().or(z.literal("")),
   notes: z.string().optional(),
 });
 
 interface GuestFormProps {
   guest?: Guest;
-  mode?: 'create' | 'edit';
+  mode?: "create" | "edit";
   onSuccess?: () => void;
 }
 
-export function GuestForm({ guest, mode = 'create', onSuccess }: GuestFormProps) {
+export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<GuestFormData>({
     resolver: zodResolver(guestSchema),
     defaultValues: {
-      name: guest?.name || '',
-      institution: guest?.institution || '',
-      purpose: guest?.purpose || '',
-      phone: guest?.phone || '',
-      email: guest?.email || '',
-      notes: guest?.notes || '',
+      name: guest?.name ?? "",
+      institution: guest?.institution ?? "",
+      purpose: guest?.purpose ?? "",
+      phone: guest?.phone ?? "",
+      email: guest?.email ?? "",
+      notes: guest?.notes ?? "",
     },
   });
 
   const onSubmit = async (data: GuestFormData) => {
     setIsSubmitting(true);
-    
+    setError(null);
+
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (mode === 'edit' && guest) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (mode === "edit" && guest) {
         const updatedGuest = GuestStorage.updateGuest(guest.id, data);
         if (updatedGuest) {
           toast.success(`Data ${updatedGuest.name} berhasil diperbarui!`, {
-            description: 'Perubahan telah disimpan',
+            description: "Perubahan telah disimpan",
           });
         }
       } else {
@@ -70,13 +71,12 @@ export function GuestForm({ guest, mode = 'create', onSuccess }: GuestFormProps)
           description: `Check-in berhasil pada ${newGuest.checkInTime}`,
         });
       }
-      
+
       form.reset();
       onSuccess?.();
-    } catch (error) {
-      toast.error(mode === 'edit' ? 'Gagal memperbarui data tamu' : 'Gagal menambahkan tamu', {
-        description: 'Silakan coba lagi',
-      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Gagal menyimpan data tamu";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -85,6 +85,8 @@ export function GuestForm({ guest, mode = 'create', onSuccess }: GuestFormProps)
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         <FormField
           control={form.control}
           name="name"
@@ -162,10 +164,10 @@ export function GuestForm({ guest, mode = 'create', onSuccess }: GuestFormProps)
             <FormItem>
               <FormLabel>Catatan (Opsional)</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Catatan tambahan..." 
+                <Textarea
+                  placeholder="Catatan tambahan..."
                   className="min-h-20"
-                  {...field} 
+                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -177,21 +179,12 @@ export function GuestForm({ guest, mode = 'create', onSuccess }: GuestFormProps)
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {mode === 'edit' ? 'Memperbarui...' : 'Menyimpan...'}
+              {mode === "edit" ? "Memperbarui..." : "Menyimpan..."}
             </>
           ) : (
             <>
-              {mode === 'edit' ? (
-                <>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Perbarui Data
-                </>
-              ) : (
-                <>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Check In
-                </>
-              )}
+              <UserPlus className="mr-2 h-4 w-4" />
+              {mode === "edit" ? "Perbarui Data" : "Check In"}
             </>
           )}
         </Button>

@@ -8,7 +8,6 @@ import {
   Search, 
   Plus, 
   Filter,
-  Calendar,
   Users,
   BarChart3
 } from 'lucide-react';

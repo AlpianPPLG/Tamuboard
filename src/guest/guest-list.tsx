@@ -33,7 +33,7 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
         </div>
         <h3 className="text-lg font-semibold mb-2">Belum ada tamu</h3>
         <p className="text-muted-foreground max-w-sm">
-          Belum ada tamu yang terdaftar. Tambahkan tamu pertama dengan mengklik tombol "Tambah Tamu".
+          Belum ada tamu yang terdaftar. Tambahkan tamu pertama dengan mengklik tombol Tambah Tamu.
         </p>
       </div>
     );
