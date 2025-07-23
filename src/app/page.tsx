@@ -6,8 +6,9 @@ import { GuestList } from '@/guest/guest-list';
 import { GuestStorage } from '@/lib/guest-stotrage';
 import { filterGuests } from '@/lib/guest-utils';
 import { Guest, FilterOptions } from '@/types/guest';
+import { LanguageProvider } from '@/contexts/language-context';
 
-export default function Home() {
+function HomePage() {
   const [guests, setGuests] = useState<Guest[]>([]);
   const [filteredGuests, setFilteredGuests] = useState<Guest[]>([]);
   const [searchValue, setSearchValue] = useState('');
@@ -16,6 +17,7 @@ export default function Home() {
     dateFrom: undefined,
     dateTo: undefined,
     status: 'all',
+    category: 'all',
     sortBy: 'date',
     sortOrder: 'desc',
   });
@@ -47,7 +49,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-16">
       <Header
         searchValue={searchValue}
         onSearchChange={setSearchValue}
@@ -56,7 +58,7 @@ export default function Home() {
         onGuestAdded={handleGuestUpdate}
       />
       
-      <main className="flex-1 w-full px-3 sm:px-4 py-4 sm:py-6 overflow-hidden">
+      <main className="flex-1 w-full px-3 sm:px-4 py-4 sm:py-6 overflow-hidden mb-4">
         <div className="space-y-4 sm:space-y-6 h-full">
           {/* Summary */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
@@ -78,5 +80,13 @@ export default function Home() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <LanguageProvider>
+      <HomePage />
+    </LanguageProvider>
   );
 }

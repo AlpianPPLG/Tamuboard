@@ -5,6 +5,12 @@ export interface Guest {
   purpose: string;
   phone: string;
   email?: string;
+  category: 'VIP' | 'regular' | 'supplier' | 'intern';
+  visitTime: 'morning' | 'afternoon' | 'evening';
+  scheduledDate?: Date;
+  scheduledTime?: string;
+  feedback?: string;
+  rating?: number;
   visitDate: Date;
   checkInTime: string;
   checkOutTime?: string;
@@ -19,14 +25,23 @@ export interface GuestFormData {
   purpose: string;
   phone: string;
   email?: string;
+  category: 'VIP' | 'regular' | 'supplier' | 'intern';
+  scheduledDate?: Date;
+  scheduledTime?: string;
   notes?: string;
 }
 
+export interface FeedbackData {
+  rating: number;
+  feedback: string;
+}
 export interface GuestStats {
   totalToday: number;
   totalThisMonth: number;
   totalThisYear: number;
   currentlyCheckedIn: number;
+  vipGuests: number;
+  scheduledToday: number;
 }
 
 export interface FilterOptions {
@@ -34,6 +49,7 @@ export interface FilterOptions {
   dateFrom?: Date;
   dateTo?: Date;
   status?: 'all' | 'checked-in' | 'checked-out';
+  category?: 'all' | 'VIP' | 'regular' | 'supplier' | 'intern';
   sortBy: 'name' | 'date' | 'institution';
   sortOrder: 'asc' | 'desc';
 }

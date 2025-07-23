@@ -2,6 +2,61 @@ import { Guest, FilterOptions } from '@/types/guest';
 
 type SortableValue = string | number;
 
+export function getVisitTime(): 'morning' | 'afternoon' | 'evening' {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 17) return 'afternoon';
+  return 'evening';
+}
+
+export function getCategoryColor(category: Guest['category']): string {
+  switch (category) {
+    case 'VIP':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+    case 'supplier':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+    case 'intern':
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+    case 'regular':
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+  }
+}
+
+export function getCategoryText(category: Guest['category'], language: 'id' | 'en' = 'id'): string {
+  const translations = {
+    id: {
+      VIP: 'VIP',
+      regular: 'Biasa',
+      supplier: 'Supplier',
+      intern: 'Siswa PKL',
+    },
+    en: {
+      VIP: 'VIP',
+      regular: 'Regular',
+      supplier: 'Supplier',
+      intern: 'Intern',
+    },
+  };
+  return translations[language][category];
+}
+
+export function getVisitTimeText(time: Guest['visitTime'], language: 'id' | 'en' = 'id'): string {
+  const translations = {
+    id: {
+      morning: 'Pagi',
+      afternoon: 'Siang',
+      evening: 'Sore',
+    },
+    en: {
+      morning: 'Morning',
+      afternoon: 'Afternoon',
+      evening: 'Evening',
+    },
+  };
+  return translations[language][time];
+}
+
 export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
   let filtered = [...guests];
 
@@ -34,6 +89,10 @@ export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
     filtered = filtered.filter((guest) => guest.status === filters.status);
   }
 
+  // Category filter
+  if (filters.category && filters.category !== 'all') {
+    filtered = filtered.filter((guest) => guest.category === filters.category);
+  }
   // Sort
   filtered.sort((a, b) => {
     let aValue: SortableValue;

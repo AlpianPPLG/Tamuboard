@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { FilterOptions } from '@/types/guest';
+import { useLanguage } from '@/contexts/language-context';
 import { CalendarIcon, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -38,6 +39,7 @@ interface FilterDialogProps {
 export function FilterDialog({ children, filters, onFiltersChange }: FilterDialogProps) {
   const [open, setOpen] = useState(false);
   const [localFilters, setLocalFilters] = useState<FilterOptions>(filters);
+  const { t } = useLanguage();
 
   const handleApply = () => {
     onFiltersChange(localFilters);
@@ -50,6 +52,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
       dateFrom: undefined,
       dateTo: undefined,
       status: 'all',
+      category: 'all',
       sortBy: 'date',
       sortOrder: 'desc',
     };
@@ -136,12 +139,35 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>
-                <SelectItem value="checked-in">Check In</SelectItem>
-                <SelectItem value="checked-out">Check Out</SelectItem>
+                <SelectItem value="checked-in">{t.checkedIn}</SelectItem>
+                <SelectItem value="checked-out">{t.checkedOut}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Category Filter */}
+          <div className="space-y-2">
+            <Label>{t.category}</Label>
+            <Select
+              value={localFilters.category}
+              onValueChange={(value: string) => {
+                if (value === 'all' || value === 'VIP' || value === 'regular' || value === 'supplier' || value === 'intern') {
+                  setLocalFilters((prev) => ({ ...prev, category: value }));
+                }
+              }}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Kategori</SelectItem>
+                <SelectItem value="regular">{t.regular}</SelectItem>
+                <SelectItem value="VIP">{t.vip}</SelectItem>
+                <SelectItem value="supplier">{t.supplier}</SelectItem>
+                <SelectItem value="intern">{t.intern}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {/* Sort Options */}
           <div className="space-y-2">
             <Label>Urutkan Berdasarkan</Label>

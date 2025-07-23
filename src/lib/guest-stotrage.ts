@@ -1,4 +1,5 @@
 import { Guest, GuestStats } from '@/types/guest';
+import { getVisitTime } from './guest-utils';
 
 const STORAGE_KEY = 'buku-tamu-guests';
 
@@ -29,6 +30,9 @@ export class GuestStorage {
           return {
             ...raw,
             visitDate: new Date(raw.visitDate),
+            // Ensure backward compatibility
+            category: raw.category || 'regular',
+            visitTime: raw.visitTime || getVisitTime(),
           };
         }
         // Jika struktur tidak sesuai, abaikan entri ini
@@ -51,7 +55,7 @@ export class GuestStorage {
   }
 
   static addGuest(
-    guest: Omit<Guest, 'id' | 'visitDate' | 'checkInTime' | 'status'>
+    guest: Omit<Guest, 'id' | 'visitDate' | 'checkInTime' | 'status' | 'visitTime'>
   ): Guest {
     const guests = this.getGuests();
     const newGuest: Guest = {
@@ -59,6 +63,7 @@ export class GuestStorage {
       id: crypto.randomUUID(),
       visitDate: new Date(),
       checkInTime: new Date().toLocaleTimeString('id-ID'),
+      visitTime: getVisitTime(),
       status: 'checked-in',
     };
 
@@ -93,6 +98,9 @@ export class GuestStorage {
     return true;
   }
 
+  static addFeedback(id: string, rating: number, feedback: string): Guest | null {
+    return this.updateGuest(id, { rating, feedback });
+  }
   static getStats(): GuestStats {
     const guests = this.getGuests();
     const today = new Date();
@@ -100,15 +108,30 @@ export class GuestStorage {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const startOfYear = new Date(today.getFullYear(), 0, 1);
 
+    const todayGuests = guests.filter((g) => g.visitDate >= startOfDay);
+    const scheduledToday = guests.filter((g) => 
+      g.scheduledDate && 
+      new Date(g.scheduledDate) >= startOfDay && 
+      new Date(g.scheduledDate) < new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000)
+    );
     return {
-      totalToday: guests.filter((g) => g.visitDate >= startOfDay).length,
+      totalToday: todayGuests.length,
       totalThisMonth: guests.filter((g) => g.visitDate >= startOfMonth).length,
       totalThisYear: guests.filter((g) => g.visitDate >= startOfYear).length,
       currentlyCheckedIn: guests.filter((g) => g.status === 'checked-in').length,
+      vipGuests: todayGuests.filter((g) => g.category === 'VIP').length,
+      scheduledToday: scheduledToday.length,
     };
   }
 
   static checkOutGuest(id: string): Guest | null {
+    const guest = this.getGuests().find(g => g.id === id);
+    if (!guest) return null;
+    
+    if (guest.status === 'checked-out') {
+      return null; // Already checked out
+    }
+    
     return this.updateGuest(id, {
       status: 'checked-out',
       checkOutTime: new Date().toLocaleTimeString('id-ID'),

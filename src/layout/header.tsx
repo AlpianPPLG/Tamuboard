@@ -4,7 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Search, Plus, Filter, Users, BarChart3 } from "lucide-react";
+import { Search, Plus, Filter, Users, BarChart3, Languages } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +22,7 @@ import { GuestForm } from "@/forms/guest-form";
 import { FilterDialog } from "@/dialogs/filter-dialog";
 import { StatsDialog } from "@/dialogs/stats-dialog";
 import { FilterOptions } from "@/types/guest";
+import { useLanguage } from "@/contexts/language-context";
 
 interface HeaderProps {
   searchValue: string;
@@ -33,6 +40,7 @@ export function Header({
   onGuestAdded,
 }: HeaderProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
   const handleGuestAdded = () => {
     setShowAddDialog(false);
@@ -50,10 +58,10 @@ export function Header({
             </div>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-xl font-bold truncate">
-                Buku Tamu
+                {t.appTitle}
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-                Sistem Pencatatan Tamu Digital
+                {t.appSubtitle}
               </p>
             </div>
           </div>
@@ -64,7 +72,7 @@ export function Header({
             <div className="relative flex-1 sm:flex-initial sm:block">
               <Search className="absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Cari tamu..."
+                placeholder={t.searchPlaceholder}
                 value={searchValue}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="w-full sm:w-48 md:w-64 pl-7 sm:pl-9 h-8 sm:h-9 text-sm"
@@ -93,18 +101,38 @@ export function Header({
               </Button>
             </StatsDialog>
 
+            {/* Language Toggle */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                >
+                  <Languages className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setLanguage('id')}>
+                  🇮🇩 Indonesia
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLanguage('en')}>
+                  🇺🇸 English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {/* Add Guest */}
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
                 <Button size="sm" className="h-8 sm:h-9">
                   <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline">Tambah</span>
-                  <span className="hidden sm:inline ml-1">Tamu</span>
+                  <span className="hidden xs:inline">{t.addGuest.split(' ')[0]}</span>
+                  <span className="hidden sm:inline ml-1">{t.addGuest.split(' ')[1] || ''}</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="w-[95vw] max-w-md mx-auto">
                 <DialogHeader>
-                  <DialogTitle>Tambah Tamu Baru</DialogTitle>
+                  <DialogTitle>{t.addGuest} Baru</DialogTitle>
                 </DialogHeader>
                 <GuestForm onSuccess={handleGuestAdded} />
               </DialogContent>

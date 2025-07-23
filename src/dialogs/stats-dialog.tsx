@@ -11,12 +11,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GuestStorage } from '@/lib/guest-stotrage';
 import { GuestStats } from '@/types/guest';
+import { useLanguage } from '@/contexts/language-context';
 import { 
   Users, 
   Calendar, 
   TrendingUp, 
   Clock,
   UserCheck,
+  Crown,
+  CalendarCheck
 } from 'lucide-react';
 
 interface StatsDialogProps {
@@ -30,7 +33,10 @@ export function StatsDialog({ children }: StatsDialogProps) {
     totalThisMonth: 0,
     totalThisYear: 0,
     currentlyCheckedIn: 0,
+    vipGuests: 0,
+    scheduledToday: 0,
   });
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (open) {
@@ -40,28 +46,42 @@ export function StatsDialog({ children }: StatsDialogProps) {
 
   const statCards = [
     {
-      title: 'Tamu Hari Ini',
+      title: t.todayGuests,
       value: stats.totalToday,
       icon: Calendar,
       description: 'Total kunjungan hari ini',
       color: 'text-blue-600 dark:text-blue-400',
     },
     {
-      title: 'Sedang Check In',
+      title: t.currentlyCheckedIn,
       value: stats.currentlyCheckedIn,
       icon: UserCheck,
       description: 'Tamu yang masih berada di lokasi',
       color: 'text-green-600 dark:text-green-400',
     },
     {
-      title: 'Bulan Ini',
+      title: t.vipGuests,
+      value: stats.vipGuests,
+      icon: Crown,
+      description: 'Tamu VIP hari ini',
+      color: 'text-purple-600 dark:text-purple-400',
+    },
+    {
+      title: t.scheduledToday,
+      value: stats.scheduledToday,
+      icon: CalendarCheck,
+      description: 'Jadwal kunjungan hari ini',
+      color: 'text-indigo-600 dark:text-indigo-400',
+    },
+    {
+      title: t.thisMonth,
       value: stats.totalThisMonth,
       icon: TrendingUp,
       description: 'Total kunjungan bulan ini',
       color: 'text-purple-600 dark:text-purple-400',
     },
     {
-      title: 'Tahun Ini',
+      title: t.thisYear,
       value: stats.totalThisYear,
       icon: Users,
       description: 'Total kunjungan tahun ini',
@@ -82,7 +102,7 @@ export function StatsDialog({ children }: StatsDialogProps) {
           </DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {statCards.map((stat, index) => {
             const IconComponent = stat.icon;
             return (

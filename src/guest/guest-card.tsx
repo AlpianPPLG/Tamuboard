@@ -29,14 +29,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { GuestDetailDialog } from './guest-detail-dialog';
+import { FeedbackDialog } from '@/dialogs/feedback-dialog';
 import { GuestForm } from '@/forms/guest-form';
 import { GuestStorage } from '@/lib/guest-stotrage';
 import { 
   getGuestInitials, 
   formatDate, 
   getStatusColor, 
-  getStatusText 
+  getStatusText,
+  getCategoryColor,
+  getCategoryText,
+  getVisitTimeText
 } from '@/lib/guest-utils';
+import { useLanguage } from '@/contexts/language-context';
 import { 
   MoreVertical, 
   Eye, 
@@ -45,7 +50,12 @@ import {
   Edit,
   Building, 
   Clock,
-  Phone
+  Phone,
+  CheckCircle,
+  XCircle,
+  MessageSquare,
+  Star,
+  Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -58,14 +68,22 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const { language, t } = useLanguage();
 
   const handleCheckOut = () => {
     const updatedGuest = GuestStorage.checkOutGuest(guest.id);
     if (updatedGuest) {
-      toast.success(`${guest.name} telah check out`, {
+      toast.success(`${guest.name} ${t.successCheckOut}`, {
         description: `Check out pada ${updatedGuest.checkOutTime}`,
+        icon: <CheckCircle className="h-4 w-4" />,
       });
       onUpdate();
+    } else {
+      toast.error("Gagal melakukan check out", {
+        description: "Terjadi kesalahan saat memproses check out",
+        icon: <XCircle className="h-4 w-4" />,
+      });
     }
   };
 
@@ -76,8 +94,14 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
   const handleDelete = () => {
     const success = GuestStorage.deleteGuest(guest.id);
     if (success) {
-      toast.success('Data tamu berhasil dihapus');
+      toast.success(`Data tamu ${t.successDelete}`, {
+        icon: <CheckCircle className="h-4 w-4" />,
+      });
       onUpdate();
+    } else {
+      toast.error('Gagal menghapus data tamu', {
+        icon: <XCircle className="h-4 w-4" />,
+      });
     }
     setShowDeleteDialog(false);
   };
@@ -111,16 +135,22 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowDetailDialog(true)}>
                   <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  Lihat Detail
+                  {t.viewDetail}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
                   <Edit className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  Edit Data
+                  {t.edit}
                 </DropdownMenuItem>
                 {guest.status === 'checked-in' && (
                   <DropdownMenuItem onClick={handleCheckOut}>
                     <LogOut className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                    Check Out
+                    {t.checkOut}
+                  </DropdownMenuItem>
+                )}
+                {guest.status === 'checked-out' && (
+                  <DropdownMenuItem onClick={() => setShowFeedbackDialog(true)}>
+                    <MessageSquare className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    {t.feedback}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem 
@@ -128,7 +158,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
                   variant="destructive"
                 >
                   <Trash2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  Hapus
+                  {t.delete}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -136,19 +166,24 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
         </CardHeader>
 
         <CardContent className="space-y-2 sm:space-y-3">
-          <div className="flex items-center justify-between">
-            <Badge className={getStatusColor(guest.status)}>
-              {getStatusText(guest.status)}
-            </Badge>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Badge className={getStatusColor(guest.status)}>
+                {getStatusText(guest.status)}
+              </Badge>
+              <Badge className={getCategoryColor(guest.category)}>
+                {getCategoryText(guest.category, language)}
+              </Badge>
+            </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-              {guest.checkInTime}
+              <span>{getVisitTimeText(guest.visitTime, language)}</span>
             </div>
           </div>
 
           <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
             <div>
-              <span className="text-muted-foreground">Keperluan:</span>
+              <span className="text-muted-foreground">{t.purpose}:</span>
               <p className="font-medium truncate text-xs sm:text-sm">{guest.purpose}</p>
             </div>
             
@@ -156,6 +191,23 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
               <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
               <span className="truncate">{guest.phone}</span>
             </div>
+
+            {guest.scheduledDate && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                <span className="truncate text-xs">
+                  Jadwal: {formatDate(guest.scheduledDate)}
+                  {guest.scheduledTime && ` ${guest.scheduledTime}`}
+                </span>
+              </div>
+            )}
+
+            {guest.rating && (
+              <div className="flex items-center gap-1">
+                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs text-muted-foreground">{guest.rating}/5</span>
+              </div>
+            )}
           </div>
 
           <div className="pt-1 sm:pt-2 border-t">
@@ -174,11 +226,18 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
         onUpdate={onUpdate}
       />
 
+      {/* Feedback Dialog */}
+      <FeedbackDialog
+        guest={guest}
+        open={showFeedbackDialog}
+        onOpenChange={setShowFeedbackDialog}
+        onUpdate={onUpdate}
+      />
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="w-[95vw] max-w-md mx-auto">
           <DialogHeader>
-            <DialogTitle>Edit Data Tamu</DialogTitle>
+            <DialogTitle>{t.edit}</DialogTitle>
           </DialogHeader>
           <GuestForm 
             guest={guest}
@@ -192,7 +251,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="w-[95vw] max-w-md mx-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Data Tamu</AlertDialogTitle>
+            <AlertDialogTitle>{t.delete} Data Tamu</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menghapus data tamu <strong>{guest.name}</strong>? 
               Tindakan ini tidak dapat dibatalkan.
@@ -201,7 +260,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Hapus
+              {t.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
