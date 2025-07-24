@@ -33,7 +33,7 @@ import { GuestStorage } from "@/lib/guest-stotrage";
 import { Guest, GuestFormData } from "@/types/guest";
 import { useLanguage } from "@/contexts/language-context";
 import { toast } from "sonner";
-import { Loader2, UserPlus, CheckCircle, XCircle, CalendarIcon } from "lucide-react";
+import { Loader2, UserPlus, XCircle, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -44,11 +44,11 @@ import { cn } from "@/lib/utils";
 
 // --- Schema ---
 const guestSchema = z.object({
-  name: z.string().min(2, "Nama minimal 2 karakter").max(50, "Nama maksimal 50 karakter"),
-  institution: z.string().min(2, "Instansi minimal 2 karakter").max(100, "Instansi maksimal 100 karakter"),
-  purpose: z.string().min(5, "Keperluan minimal 5 karakter").max(200, "Keperluan maksimal 200 karakter"),
-  phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
-  email: z.string().email("Format email tidak valid").optional().or(z.literal("")),
+  name: z.string().min(2).max(50),
+  institution: z.string().min(2).max(100),
+  purpose: z.string().min(5).max(200),
+  phone: z.string().min(10),
+  email: z.string().email().optional().or(z.literal("")),
   category: z.enum(["VIP", "regular", "supplier", "intern"]),
   scheduledDate: z.date().optional(),
   scheduledTime: z.string().optional(),
@@ -67,27 +67,9 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
 
-  // Handle case when in edit mode but guest is not found
-  if (mode === "edit" && !guest) {
-    return (
-      <div className="p-4 text-center space-y-4">
-        <div className="flex flex-col items-center justify-center space-y-2 text-red-600">
-          <XCircle className="h-12 w-12" />
-          <h3 className="text-lg font-medium">Data Tamu Tidak Ditemukan</h3>
-        </div>
-        <p className="text-muted-foreground">
-          Data tamu tidak dapat dimuat. Silakan tutup dan coba lagi.
-        </p>
-        <Button 
-          onClick={() => onSuccess?.()}
-          className="mt-4"
-        >
-          Tutup
-        </Button>
-      </div>
-    );
-  }
-
+  // ——————————————————————————
+  // HOOK SELALU DIPANGGIL DI TOP-LEVEL
+  // ——————————————————————————
   const form = useForm<GuestFormData>({
     resolver: zodResolver(guestSchema),
     defaultValues: {
@@ -97,11 +79,24 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       phone: guest?.phone ?? "",
       email: guest?.email ?? "",
       category: guest?.category ?? "regular",
-      scheduledDate: guest?.scheduledDate,
+      scheduledDate: guest?.scheduledDate
+        ? new Date(guest.scheduledDate)
+        : undefined,
       scheduledTime: guest?.scheduledTime ?? "",
       notes: guest?.notes ?? "",
     },
   });
+
+  // Jika edit mode tapi guest tidak ada → tampilkan placeholder
+  if (mode === "edit" && !guest) {
+    return (
+      <div className="p-4 text-center space-y-4">
+        <XCircle className="h-12 w-12 text-red-500 mx-auto" />
+        <h3 className="text-lg font-medium">Data Tamu Tidak Ditemukan</h3>
+        <Button onClick={() => onSuccess?.()}>Tutup</Button>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: GuestFormData) => {
     setIsSubmitting(true);
@@ -116,28 +111,20 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       setProgress(80);
       await new Promise((r) => setTimeout(r, 300));
 
-      if (mode === "edit" && guest) {
-        const updated = GuestStorage.updateGuest(guest.id, data);
-        if (updated) {
-          toast.success(`${updated.name} ${t.successUpdate}`, {
-            description: "Perubahan telah disimpan",
-            icon: <CheckCircle className="h-4 w-4" />,
-          });
-        }
+      if (mode === "edit") {
+        const updated = GuestStorage.updateGuest(guest!.id, data);
+        toast.success(`${updated?.name} ${t.successUpdate}`);
       } else {
         const created = GuestStorage.addGuest(data);
-        toast.success(`${created.name} ${t.successCheckIn}`, {
-          description: `Check-in berhasil pada ${created.checkInTime}`,
-          icon: <CheckCircle className="h-4 w-4" />,
-        });
+        toast.success(`${created.name} ${t.successCheckIn}`);
       }
 
       form.reset();
       onSuccess?.();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Gagal menyimpan data tamu";
+      const msg = err instanceof Error ? err.message : "Gagal menyimpan";
       setError(msg);
-      toast.error("Gagal menyimpan!", { description: msg, icon: <XCircle className="h-4 w-4" /> });
+      toast.error("Gagal menyimpan!", { description: msg });
     } finally {
       setIsSubmitting(false);
       setProgress(0);
@@ -152,7 +139,11 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                {progress < 50 ? "Memvalidasi..." : progress < 80 ? "Menyimpan..." : "Menyelesaikan..."}
+                {progress < 50
+                  ? "Memvalidasi..."
+                  : progress < 80
+                  ? "Menyimpan..."
+                  : "Menyelesaikan..."}
               </span>
               <span>{progress}%</span>
             </div>
@@ -177,7 +168,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                   <FormItem>
                     <FormLabel>{t.fullName}</FormLabel>
                     <FormControl>
-                      <Input placeholder={`Masukkan ${t.fullName.toLowerCase()}`} {...field} disabled={isSubmitting} />
+                      <Input {...field} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,7 +181,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                   <FormItem>
                     <FormLabel>{t.institution}</FormLabel>
                     <FormControl>
-                      <Input placeholder={`Masukkan ${t.institution.toLowerCase()}`} {...field} disabled={isSubmitting} />
+                      <Input {...field} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -203,7 +194,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                   <FormItem>
                     <FormLabel>{t.purpose}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Contoh: Meeting, Interview" {...field} disabled={isSubmitting} />
+                      <Input {...field} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -216,7 +207,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                   <FormItem>
                     <FormLabel>Nomor Telepon</FormLabel>
                     <FormControl>
-                      <Input placeholder="081234567890" {...field} disabled={isSubmitting} />
+                      <Input {...field} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -229,7 +220,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                   <FormItem>
                     <FormLabel>Email (Opsional)</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="email@contoh.com" {...field} disabled={isSubmitting} />
+                      <Input type="email" {...field} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -269,7 +260,10 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                         <FormControl>
                           <Button
                             variant="outline"
-                            className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                            className={cn(
+                              "pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
                             disabled={isSubmitting}
                           >
                             {field.value ? format(field.value, "PPP", { locale: id }) : "Pilih tanggal"}
@@ -311,7 +305,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
                   <FormItem className="md:col-span-2">
                     <FormLabel>Catatan (Opsional)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Catatan tambahan..." {...field} disabled={isSubmitting} />
+                      <Textarea {...field} disabled={isSubmitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -320,35 +314,20 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
             </div>
           </TabsContent>
 
-          <TabsContent value="special-requirements" className="space-y-6">
-            {guest ? (
-              <SpecialRequirementsForm guest={guest} onUpdate={onSuccess} />
-            ) : (
-              <div className="text-center py-4 text-muted-foreground">
-                Simpan data tamu terlebih dahulu untuk mengelola persyaratan khusus.
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="auto-checkout" className="space-y-6">
-            {guest ? (
-              <AutoCheckoutSettings guest={guest} onUpdate={onSuccess} />
-            ) : (
-              <div className="text-center py-4 text-muted-foreground">
-                Simpan data tamu terlebih dahulu untuk mengatur pengaturan auto-checkout.
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="privacy" className="space-y-6">
-            {guest ? (
-              <PrivacySettings guest={guest} onUpdate={onSuccess} />
-            ) : (
-              <div className="text-center py-4 text-muted-foreground">
-                Simpan data tamu terlebih dahulu untuk mengatur pengaturan privasi.
-              </div>
-            )}
-          </TabsContent>
+          {/* Sub-form hanya jika guest sudah ada / tidak undefined */}
+          {guest && (
+            <>
+              <TabsContent value="special-requirements" className="space-y-6">
+                <SpecialRequirementsForm guest={guest} onUpdate={onSuccess} />
+              </TabsContent>
+              <TabsContent value="auto-checkout" className="space-y-6">
+                <AutoCheckoutSettings guest={guest} onUpdate={onSuccess} />
+              </TabsContent>
+              <TabsContent value="privacy" className="space-y-6">
+                <PrivacySettings guest={guest} onUpdate={onSuccess} />
+              </TabsContent>
+            </>
+          )}
         </Tabs>
 
         <div className="flex justify-end pt-4 border-t">
