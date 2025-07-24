@@ -17,6 +17,53 @@ export interface Guest {
   status: 'checked-in' | 'checked-out';
   notes?: string;
   avatar?: string;
+  privacySettings?: PrivacySettings;
+  specialRequirements?: SpecialRequirement[];
+  autoCheckoutReminder?: AutoCheckoutReminder;
+  reminderSettings?: ReminderSettings;
+  reminderSentAt?: Date;
+  expectedDuration?: ExpectedDuration;
+}
+
+export interface PrivacySettings {
+  hideName?: boolean;
+  hidePhone?: boolean;
+  hideEmail?: boolean;
+}
+
+export interface SpecialRequirement {
+  type: 'food' | 'accommodation' | 'other';
+  description: string;
+}
+
+export interface AutoCheckoutReminder {
+  enabled: boolean;
+  reminderTime: 'morning' | 'afternoon' | 'evening';
+}
+
+export interface ExpectedDuration {
+  duration: number;
+  unit: 'minutes' | 'hours';
+}
+
+export interface PurposeTemplate {
+  id: string;
+  name: string;
+  requirements: RequirementType[];
+  category: string;
+}
+
+export interface RequirementType {
+  type: 'food' | 'accommodation' | 'other';
+  description: string;
+}
+
+export interface ReminderSettings {
+  enabled: boolean;
+  reminderTime: 'morning' | 'afternoon' | 'evening';
+  reminderIntervals: number[];
+  autoCheckoutAfter: number;
+  notificationMethods: ('system' | 'email' | 'sms')[];
 }
 
 export interface GuestFormData {
