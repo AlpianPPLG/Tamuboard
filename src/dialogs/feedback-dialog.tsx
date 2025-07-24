@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { GuestStorage } from '@/lib/guest-stotrage';
-import { Guest } from '@/types/guest';
-import { useLanguage } from '@/contexts/language-context';
-import { toast } from 'sonner';
-import { Star, CheckCircle, XCircle } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { GuestStorage } from "@/lib/guest-stotrage";
+import { Guest } from "@/types/guest";
+import { useLanguage } from "@/contexts/language-context";
+import { toast } from "sonner";
+import { Star, CheckCircle, XCircle } from "lucide-react";
 
 interface FeedbackDialogProps {
   guest: Guest;
@@ -22,31 +22,35 @@ interface FeedbackDialogProps {
   onUpdate?: () => void;
 }
 
-export function FeedbackDialog({ guest, open, onOpenChange, onUpdate }: FeedbackDialogProps) {
-  const [rating, setRating] = useState(guest.rating || 0);
-  const [feedback, setFeedback] = useState(guest.feedback || '');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function FeedbackDialog({
+  guest,
+  open,
+  onOpenChange,
+  onUpdate,
+}: FeedbackDialogProps) {
+  const [rating, setRating] = useState<number>(guest.rating ?? 0);
+  const [feedback, setFeedback] = useState<string>(guest.feedback ?? "");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { t } = useLanguage();
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      toast.error('Silakan berikan rating terlebih dahulu');
+      toast.error("Silakan berikan rating terlebih dahulu");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const updatedGuest = GuestStorage.addFeedback(guest.id, rating, feedback);
-      if (updatedGuest) {
-        toast.success('Feedback berhasil disimpan!', {
-          description: 'Terima kasih atas feedback Anda',
-          icon: <CheckCircle className="h-4 w-4" />,
-        });
-        onUpdate?.();
-        onOpenChange(false);
-      }
-    } catch (error) {
-      toast.error('Gagal menyimpan feedback', {
+      await GuestStorage.addFeedback(guest.id, rating, feedback);
+      toast.success("Feedback berhasil disimpan!", {
+        description: "Terima kasih atas feedback Anda",
+        icon: <CheckCircle className="h-4 w-4" />,
+      });
+      onUpdate?.();
+      onOpenChange(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      toast.error("Gagal menyimpan feedback", {
         icon: <XCircle className="h-4 w-4" />,
       });
     } finally {
@@ -62,6 +66,7 @@ export function FeedbackDialog({ guest, open, onOpenChange, onUpdate }: Feedback
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Rating */}
           <div>
             <label className="text-sm font-medium mb-2 block">{t.rating}</label>
             <div className="flex gap-1">
@@ -73,14 +78,13 @@ export function FeedbackDialog({ guest, open, onOpenChange, onUpdate }: Feedback
                   className="p-1 hover:scale-110 transition-transform"
                   disabled={isSubmitting}
                   aria-label={`Rate ${star} out of 5`}
-                  title={`Rate ${star} out of 5`}
-                  aria-pressed={star <= rating ? 'true' : 'false'}
+                  aria-pressed={star <= rating}
                 >
                   <Star
                     className={`h-6 w-6 ${
                       star <= rating
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-300'
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
                     }`}
                   />
                 </button>
@@ -88,6 +92,7 @@ export function FeedbackDialog({ guest, open, onOpenChange, onUpdate }: Feedback
             </div>
           </div>
 
+          {/* Feedback */}
           <div>
             <label className="text-sm font-medium mb-2 block">{t.feedback}</label>
             <Textarea
@@ -99,6 +104,7 @@ export function FeedbackDialog({ guest, open, onOpenChange, onUpdate }: Feedback
             />
           </div>
 
+          {/* Actions */}
           <div className="flex gap-2 pt-4">
             <Button
               variant="outline"
@@ -113,7 +119,7 @@ export function FeedbackDialog({ guest, open, onOpenChange, onUpdate }: Feedback
               className="flex-1"
               disabled={isSubmitting || rating === 0}
             >
-              {isSubmitting ? 'Menyimpan...' : t.submitFeedback}
+              {isSubmitting ? "Menyimpan..." : t.submitFeedback}
             </Button>
           </div>
         </div>

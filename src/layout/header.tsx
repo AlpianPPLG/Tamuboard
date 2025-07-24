@@ -40,7 +40,7 @@ export function Header({
   onGuestAdded,
 }: HeaderProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const { language, setLanguage, t } = useLanguage();
+  const { setLanguage, t } = useLanguage();
 
   const handleGuestAdded = () => {
     setShowAddDialog(false);
