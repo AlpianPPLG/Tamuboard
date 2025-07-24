@@ -1,3 +1,5 @@
+"use client"
+
 import { Guest, GuestStats } from '@/types/guest';
 import { getVisitTime } from './guest-utils';
 

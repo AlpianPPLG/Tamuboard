@@ -1,3 +1,5 @@
+"use client"
+
 import { Guest, FilterOptions } from '@/types/guest';
 
 type SortableValue = string | number;

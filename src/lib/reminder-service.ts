@@ -1,4 +1,5 @@
-// src/lib/reminder-service.ts
+"use client"
+
 import React from 'react';
 import { Guest, ReminderSettings } from '@/types/guest';
 import { GuestStorage } from '@/lib/guest-stotrage';

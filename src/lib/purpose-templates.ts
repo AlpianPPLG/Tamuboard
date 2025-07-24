@@ -1,3 +1,5 @@
+"use client"
+
 import { PurposeTemplate, RequirementType } from "@/types/guest";
 
 export const PURPORSE_TEMPLATES: PurposeTemplate[] = [

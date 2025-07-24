@@ -1,3 +1,5 @@
+"use client"
+
 export type Language = 'id' | 'en';
 
 export interface Translations {
