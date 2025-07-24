@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -36,27 +36,20 @@ import { toast } from "sonner";
 import { Loader2, UserPlus, CheckCircle, XCircle, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AutoCheckoutSettings } from "@/components/auto-checkout-settings";
+import { SpecialRequirementsForm } from "@/components/special-requirements-form";
+import { PrivacySettings } from "@/components/privacy-settings";
+import { cn } from "@/lib/utils";
 
+// --- Schema ---
 const guestSchema = z.object({
-  name: z.string()
-    .min(2, "Nama minimal 2 karakter")
-    .max(50, "Nama maksimal 50 karakter")
-    .regex(/^[a-zA-Z\s]+$/, "Nama hanya boleh berisi huruf dan spasi"),
-  institution: z.string()
-    .min(2, "Instansi minimal 2 karakter")
-    .max(100, "Instansi maksimal 100 karakter"),
-  purpose: z.string()
-    .min(5, "Keperluan minimal 5 karakter")
-    .max(200, "Keperluan maksimal 200 karakter"),
-  phone: z.string()
-    .min(10, "Nomor telepon minimal 10 digit")
-    .max(15, "Nomor telepon maksimal 15 digit")
-    .regex(/^[0-9+\-\s()]+$/, "Format nomor telepon tidak valid"),
-  email: z.string()
-    .email("Format email tidak valid")
-    .optional()
-    .or(z.literal("")),
-  category: z.enum(['VIP', 'regular', 'supplier', 'intern']),
+  name: z.string().min(2, "Nama minimal 2 karakter").max(50, "Nama maksimal 50 karakter"),
+  institution: z.string().min(2, "Instansi minimal 2 karakter").max(100, "Instansi maksimal 100 karakter"),
+  purpose: z.string().min(5, "Keperluan minimal 5 karakter").max(200, "Keperluan maksimal 200 karakter"),
+  phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
+  email: z.string().email("Format email tidak valid").optional().or(z.literal("")),
+  category: z.enum(["VIP", "regular", "supplier", "intern"]),
   scheduledDate: z.date().optional(),
   scheduledTime: z.string().optional(),
   notes: z.string().optional(),
@@ -72,7 +65,6 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const { t } = useLanguage();
 
   const form = useForm<GuestFormData>({
@@ -94,281 +86,267 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
     setIsSubmitting(true);
     setProgress(0);
     setError(null);
-    setSuccess(false);
 
     try {
-      // Simulate progress steps
       setProgress(20);
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      
+      await new Promise((r) => setTimeout(r, 300));
       setProgress(50);
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      
+      await new Promise((r) => setTimeout(r, 300));
       setProgress(80);
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((r) => setTimeout(r, 300));
 
       if (mode === "edit" && guest) {
-        const updatedGuest = GuestStorage.updateGuest(guest.id, data);
-        if (updatedGuest) {
-          setProgress(100);
-          setSuccess(true);
-          toast.success(`${updatedGuest.name} ${t.successUpdate}`, {
+        const updated = GuestStorage.updateGuest(guest.id, data);
+        if (updated) {
+          toast.success(`${updated.name} ${t.successUpdate}`, {
             description: "Perubahan telah disimpan",
             icon: <CheckCircle className="h-4 w-4" />,
           });
         }
       } else {
-        const newGuest = GuestStorage.addGuest(data);
-        setProgress(100);
-        setSuccess(true);
-        toast.success(`${newGuest.name} ${t.successCheckIn}`, {
-          description: `Check-in berhasil pada ${newGuest.checkInTime}`,
+        const created = GuestStorage.addGuest(data);
+        toast.success(`${created.name} ${t.successCheckIn}`, {
+          description: `Check-in berhasil pada ${created.checkInTime}`,
           icon: <CheckCircle className="h-4 w-4" />,
         });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
       form.reset();
       onSuccess?.();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Gagal menyimpan data tamu";
-      setError(message);
-      toast.error("Gagal menyimpan data!", {
-        description: message,
-        icon: <XCircle className="h-4 w-4" />,
-      });
+      const msg = err instanceof Error ? err.message : "Gagal menyimpan data tamu";
+      setError(msg);
+      toast.error("Gagal menyimpan!", { description: msg, icon: <XCircle className="h-4 w-4" /> });
     } finally {
       setIsSubmitting(false);
       setProgress(0);
-      setSuccess(false);
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {error && <p className="text-sm text-red-600">{error}</p>}
-        
         {isSubmitting && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                {progress < 50 ? "Memvalidasi data..." : 
-                 progress < 80 ? "Menyimpan data..." : 
-                 "Menyelesaikan..."}
+                {progress < 50 ? "Memvalidasi..." : progress < 80 ? "Menyimpan..." : "Menyelesaikan..."}
               </span>
-              <span className="font-medium">{progress}%</span>
+              <span>{progress}%</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
         )}
 
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.fullName}</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder={`Masukkan ${t.fullName.toLowerCase()}`}
-                  {...field}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Tabs defaultValue="guest-info" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="guest-info">Info</TabsTrigger>
+            <TabsTrigger value="special-requirements">Kebutuhan</TabsTrigger>
+            <TabsTrigger value="auto-checkout">Check-out</TabsTrigger>
+            <TabsTrigger value="privacy">Privasi</TabsTrigger>
+          </TabsList>
 
-        <FormField
-          control={form.control}
-          name="institution"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.institution}</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder={`Masukkan ${t.institution.toLowerCase()}`}
-                  {...field}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.category}</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={`Pilih ${t.category.toLowerCase()}`} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="regular">{t.regular}</SelectItem>
-                  <SelectItem value="VIP">{t.vip}</SelectItem>
-                  <SelectItem value="supplier">{t.supplier}</SelectItem>
-                  <SelectItem value="intern">{t.intern}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="purpose"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.purpose}</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder={`Masukkan ${t.purpose.toLowerCase()}`}
-                  {...field}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="scheduledDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.scheduledDate}</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
+          <TabsContent value="guest-info" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.fullName}</FormLabel>
                     <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                        disabled={isSubmitting}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value
-                          ? format(field.value, 'dd MMM yyyy', { locale: id })
-                          : 'Pilih tanggal'}
-                      </Button>
+                      <Input placeholder={`Masukkan ${t.fullName.toLowerCase()}`} {...field} disabled={isSubmitting} />
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="institution"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.institution}</FormLabel>
+                    <FormControl>
+                      <Input placeholder={`Masukkan ${t.institution.toLowerCase()}`} {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="purpose"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t.purpose}</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Contoh: Meeting, Interview" {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nomor Telepon</FormLabel>
+                    <FormControl>
+                      <Input placeholder="081234567890" {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email (Opsional)</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="email@contoh.com" {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kategori</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih kategori" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="VIP">VIP</SelectItem>
+                        <SelectItem value="regular">Reguler</SelectItem>
+                        <SelectItem value="supplier">Supplier</SelectItem>
+                        <SelectItem value="intern">Siswa/Magang</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="scheduledDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Tanggal Dijadwalkan (Opsional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
+                            disabled={isSubmitting}
+                          >
+                            {field.value ? format(field.value, "PPP", { locale: id }) : "Pilih tanggal"}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="scheduledTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Waktu Dijadwalkan (Opsional)</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Catatan (Opsional)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Catatan tambahan..." {...field} disabled={isSubmitting} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </TabsContent>
 
-          <FormField
-            control={form.control}
-            name="scheduledTime"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t.scheduledTime}</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="time"
-                    {...field}
-                    disabled={isSubmitting}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <TabsContent value="special-requirements" className="space-y-6">
+            {guest ? (
+              <SpecialRequirementsForm guest={guest} onUpdate={onSuccess} />
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                Simpan data tamu terlebih dahulu untuk mengelola persyaratan khusus.
+              </div>
             )}
-          />
+          </TabsContent>
+
+          <TabsContent value="auto-checkout" className="space-y-6">
+            {guest ? (
+              <AutoCheckoutSettings guest={guest} onUpdate={onSuccess} />
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                Simpan data tamu terlebih dahulu untuk mengatur pengaturan auto-checkout.
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="privacy" className="space-y-6">
+            {guest ? (
+              <PrivacySettings guest={guest} onUpdate={onSuccess} />
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                Simpan data tamu terlebih dahulu untuk mengatur pengaturan privasi.
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        <div className="flex justify-end pt-4 border-t">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Menyimpan...
+              </>
+            ) : mode === "edit" ? (
+              "Perbarui Data"
+            ) : (
+              <>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Simpan Tamu
+              </>
+            )}
+          </Button>
         </div>
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.phone}</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="08xxxxxxxxxx" 
-                  {...field}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.email}</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="email@example.com" 
-                  type="email"
-                  {...field}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t.notes}</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder={`${t.notes.toLowerCase()}...`}
-                  className="min-h-20"
-                  disabled={isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {mode === "edit" ? "Memperbarui..." : "Menyimpan..."}
-            </>
-          ) : success ? (
-            <>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {mode === "edit" ? "Berhasil Diperbarui!" : "Berhasil Disimpan!"}
-            </>
-          ) : (
-            <>
-              <UserPlus className="mr-2 h-4 w-4" />
-              {mode === "edit" ? t.updateData : t.checkIn}
-            </>
-          )}
-        </Button>
       </form>
     </Form>
   );

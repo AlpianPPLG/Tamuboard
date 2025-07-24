@@ -32,6 +32,7 @@ export interface PrivacySettings {
 }
 
 export interface SpecialRequirement {
+  id?: string;
   type: 'food' | 'accommodation' | 'other';
   description: string;
 }
