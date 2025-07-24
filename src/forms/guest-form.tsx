@@ -67,6 +67,27 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
 
+  // Handle case when in edit mode but guest is not found
+  if (mode === "edit" && !guest) {
+    return (
+      <div className="p-4 text-center space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-2 text-red-600">
+          <XCircle className="h-12 w-12" />
+          <h3 className="text-lg font-medium">Data Tamu Tidak Ditemukan</h3>
+        </div>
+        <p className="text-muted-foreground">
+          Data tamu tidak dapat dimuat. Silakan tutup dan coba lagi.
+        </p>
+        <Button 
+          onClick={() => onSuccess?.()}
+          className="mt-4"
+        >
+          Tutup
+        </Button>
+      </div>
+    );
+  }
+
   const form = useForm<GuestFormData>({
     resolver: zodResolver(guestSchema),
     defaultValues: {

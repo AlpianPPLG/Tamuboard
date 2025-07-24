@@ -28,8 +28,11 @@ import {
   Calendar, 
   LogIn,
   LogOut,
-  Edit
+  Edit,
+  XCircle
 } from 'lucide-react';
+
+import { DialogFooter } from '@/components/ui/dialog';
 
 interface GuestDetailDialogProps {
   guest: Guest;
@@ -45,6 +48,33 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
     setShowEditForm(false);
     onUpdate?.();
   };
+
+  // Handle case when guest is not found
+  if (!guest) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Data Tamu Tidak Ditemukan</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-4 space-y-4">
+            <XCircle className="h-12 w-12 text-red-500" />
+            <p className="text-muted-foreground text-center">
+              Data tamu tidak dapat dimuat. Silakan tutup dan coba lagi.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (showEditForm) {
     return (
