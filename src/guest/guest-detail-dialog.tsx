@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Guest } from '@/types/guest';
 import {
   Dialog,
@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 
 import { DialogFooter } from '@/components/ui/dialog';
+import { GuestStorage } from '@/lib/guest-stotrage';
 
 interface GuestDetailDialogProps {
   guest: Guest;
@@ -41,16 +42,65 @@ interface GuestDetailDialogProps {
   onUpdate?: () => void;
 }
 
-export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: GuestDetailDialogProps) {
+export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onUpdate }: GuestDetailDialogProps) {
   const [showEditForm, setShowEditForm] = useState(false);
+  const [currentGuest, setCurrentGuest] = useState<Guest | null>(initialGuest);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch the latest guest data when dialog opens
+  useEffect(() => {
+    const fetchGuestData = async () => {
+      if (open && initialGuest?.id) {
+        try {
+          setIsLoading(true);
+          const guests = GuestStorage.getGuests();
+          const freshGuest = guests.find(g => g.id === initialGuest.id) || null;
+          setCurrentGuest(freshGuest);
+        } catch (error) {
+          console.error('Error fetching guest data:', error);
+          setCurrentGuest(null);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchGuestData();
+  }, [open, initialGuest?.id]);
 
   const handleEditSuccess = () => {
     setShowEditForm(false);
     onUpdate?.();
+    
+    // Refresh the guest data after successful update
+    if (initialGuest?.id) {
+      const guests = GuestStorage.getGuests();
+      const updatedGuest = guests.find(g => g.id === initialGuest.id) || null;
+      setCurrentGuest(updatedGuest);
+    }
   };
 
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Memuat Data Tamu</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p className="text-muted-foreground text-center">
+              Memuat data tamu, harap tunggu...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   // Handle case when guest is not found
-  if (!guest) {
+  if (!currentGuest) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
@@ -76,7 +126,7 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
     );
   }
 
-  if (showEditForm) {
+  if (showEditForm && currentGuest) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md">
@@ -84,7 +134,7 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
             <DialogTitle>Edit Data Tamu</DialogTitle>
           </DialogHeader>
           <GuestForm 
-            guest={guest}
+            guest={currentGuest}
             mode="edit"
             onSuccess={handleEditSuccess}
           />
@@ -97,32 +147,32 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
     {
       icon: User,
       label: 'Nama Lengkap',
-      value: guest.name,
+      value: currentGuest.name,
     },
     {
       icon: Building,
       label: 'Instansi/Perusahaan',
-      value: guest.institution,
+      value: currentGuest.institution || '-',
     },
     {
       icon: Phone,
       label: 'Nomor Telepon',
-      value: guest.phone,
+      value: currentGuest.phone || '-',
     },
-    ...(guest.email ? [{
+    ...(currentGuest.email ? [{
       icon: Mail,
       label: 'Email',
-      value: guest.email,
+      value: currentGuest.email,
     }] : []),
     {
       icon: MessageSquare,
       label: 'Keperluan',
-      value: guest.purpose,
+      value: currentGuest.purpose || '-',
     },
-    ...(guest.notes ? [{
+    ...(currentGuest.notes ? [{
       icon: MessageSquare,
       label: 'Catatan',
-      value: guest.notes,
+      value: currentGuest.notes,
     }] : []),
   ];
 
@@ -137,6 +187,7 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
               size="sm"
               onClick={() => setShowEditForm(true)}
               className="h-8"
+              disabled={isLoading}
             >
               <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Edit
@@ -149,14 +200,16 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
           <div className="flex items-center gap-3 sm:gap-4">
             <Avatar className="h-12 w-12 sm:h-16 sm:w-16 flex-shrink-0">
               <AvatarFallback className="bg-primary text-primary-foreground text-sm sm:text-lg">
-                {getGuestInitials(guest.name)}
+                {getGuestInitials(currentGuest.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base sm:text-lg font-semibold truncate">{guest.name}</h3>
-              <p className="text-sm sm:text-base text-muted-foreground truncate">{guest.institution}</p>
-              <Badge className={`mt-2 ${getStatusColor(guest.status)}`}>
-                {getStatusText(guest.status)}
+              <h3 className="text-base sm:text-lg font-semibold truncate">{currentGuest.name}</h3>
+              <p className="text-sm sm:text-base text-muted-foreground truncate">
+                {currentGuest.institution || 'Tidak ada instansi'}
+              </p>
+              <Badge className={`mt-2 ${getStatusColor(currentGuest.status)}`}>
+                {getStatusText(currentGuest.status)}
               </Badge>
             </div>
           </div>
@@ -192,7 +245,9 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-muted-foreground">Tanggal Kunjungan</p>
-                  <p className="text-sm sm:text-base">{formatDate(guest.visitDate)}</p>
+                  <p className="text-sm sm:text-base">
+                    {currentGuest.visitDate ? formatDate(currentGuest.visitDate) : '-'}
+                  </p>
                 </div>
               </div>
 
@@ -200,16 +255,16 @@ export function GuestDetailDialog({ guest, open, onOpenChange, onUpdate }: Guest
                 <LogIn className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-muted-foreground">Waktu Check In</p>
-                  <p className="text-sm sm:text-base">{guest.checkInTime}</p>
+                  <p className="text-sm sm:text-base">{currentGuest.checkInTime || '-'}</p>
                 </div>
               </div>
 
-              {guest.checkOutTime && (
+              {currentGuest.checkOutTime && (
                 <div className="flex items-center gap-2 sm:gap-3">
                   <LogOut className="h-3 w-3 sm:h-4 sm:w-4 text-red-600 flex-shrink-0" />
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">Waktu Check Out</p>
-                    <p className="text-sm sm:text-base">{guest.checkOutTime}</p>
+                    <p className="text-sm sm:text-base">{currentGuest.checkOutTime}</p>
                   </div>
                 </div>
               )}
