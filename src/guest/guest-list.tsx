@@ -40,49 +40,51 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 h-full flex flex-col">
+    <div className="space-y-2 xs:space-y-3 h-full flex flex-col">
       {/* Guest Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 flex-1 overflow-y-auto">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 xs:gap-2 sm:gap-3 flex-1 overflow-y-auto">
         {currentGuests.map((guest) => (
-          <GuestCard 
-            key={guest.id} 
-            guest={guest} 
-            onUpdate={onGuestUpdate}
-          />
+          <div key={guest.id} className="w-full h-full">
+            <GuestCard 
+              guest={guest} 
+              onUpdate={onGuestUpdate}
+            />
+          </div>
         ))}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 border-t">
-          <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-            Menampilkan {startIndex + 1}-{Math.min(endIndex, guests.length)} dari {guests.length} tamu
+        <div className="flex flex-col xs:flex-row items-center justify-between gap-1.5 xs:gap-3 pt-2 border-t">
+          <div className="text-[11px] xs:text-xs text-muted-foreground order-2 xs:order-1 text-center xs:text-left">
+            {startIndex + 1}-{Math.min(endIndex, guests.length)} dari {guests.length}
           </div>
           
-          <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
+          <div className="flex items-center gap-1 order-1 xs:order-2 w-full xs:w-auto justify-between xs:justify-start">
             <Button
               variant="outline"
               size="sm"
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className="h-8 px-2 sm:px-3"
+              className="h-7 w-8 p-0"
             >
-              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline ml-1">Sebelumnya</span>
+              <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
             
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => goToPage(page)}
-                  className="w-7 h-7 sm:w-8 sm:h-8 p-0 text-xs sm:text-sm"
-                >
-                  {page}
-                </Button>
-              ))}
+            <div className="flex-1 xs:flex-none flex items-center justify-center overflow-x-auto mx-1">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => goToPage(page)}
+                    className={`h-7 min-w-[28px] p-0 text-xs ${currentPage === page ? '' : 'text-muted-foreground'}`}
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
             </div>
             
             <Button
@@ -90,10 +92,9 @@ export function GuestList({ guests, onGuestUpdate }: GuestListProps) {
               size="sm"
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="h-8 px-2 sm:px-3"
+              className="h-7 w-8 p-0"
             >
-              <span className="hidden sm:inline mr-1">Selanjutnya</span>
-              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

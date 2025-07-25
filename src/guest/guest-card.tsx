@@ -109,18 +109,18 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
   return (
     <>
       <Card className="hover:shadow-md transition-shadow h-fit">
-        <CardHeader className="pb-2 sm:pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-              <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
-                <AvatarFallback className="bg-primary text-primary-foreground">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 xs:gap-3 min-w-0 flex-1">
+              <Avatar className="h-8 w-8 xs:h-10 xs:w-10 flex-shrink-0">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs xs:text-sm">
                   {getGuestInitials(guest.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm sm:text-base font-semibold truncate">{guest.name}</h3>
-                <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
-                  <Building className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                <h3 className="text-sm xs:text-base font-medium sm:font-semibold leading-tight truncate">{guest.name}</h3>
+                <div className="flex items-center gap-1 text-[11px] xs:text-xs sm:text-sm text-muted-foreground mt-0.5">
+                  <Building className="h-2.5 w-2.5 xs:h-3 xs:w-3 flex-shrink-0" />
                   <span className="truncate">{guest.institution}</span>
                 </div>
               </div>
@@ -128,11 +128,16 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 sm:h-8 sm:w-8 p-0 flex-shrink-0">
-                  <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 w-6 xs:h-7 xs:w-7 p-0 flex-shrink-0"
+                  aria-label="Menu tamu"
+                >
+                  <MoreVertical className="h-3 w-3 xs:h-4 xs:w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="min-w-[140px] sm:min-w-[160px]">
                 <DropdownMenuItem onClick={() => setShowDetailDialog(true)}>
                   <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                   {t.viewDetail}
@@ -165,38 +170,47 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-2 sm:space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <Badge className={getStatusColor(guest.status)}>
+        <CardContent className="space-y-2 sm:space-y-3 px-3 sm:px-4 pt-0 pb-3 sm:pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
+            <div className="flex flex-wrap items-center gap-1">
+              <Badge className={`text-[10px] xs:text-xs py-0.5 px-1.5 ${getStatusColor(guest.status)}`}>
                 {getStatusText(guest.status)}
               </Badge>
-              <Badge className={getCategoryColor(guest.category)}>
+              <Badge className={`text-[10px] xs:text-xs py-0.5 px-1.5 ${getCategoryColor(guest.category)}`}>
                 {getCategoryText(guest.category, language)}
               </Badge>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+            <div className="flex items-center gap-1 text-[10px] xs:text-xs text-muted-foreground">
+              <Clock className="h-2.5 w-2.5 xs:h-3 xs:w-3 flex-shrink-0" />
               <span>{getVisitTimeText(guest.visitTime, language)}</span>
             </div>
           </div>
 
-          <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
-            <div>
-              <span className="text-muted-foreground">{t.purpose}:</span>
-              <p className="font-medium truncate text-xs sm:text-sm">{guest.purpose}</p>
+          <div className="space-y-1.5 sm:space-y-2 text-xs xs:text-sm">
+            <div className="min-w-0">
+              <span className="text-muted-foreground text-[11px] xs:text-xs">{t.purpose}:</span>
+              <p className="font-medium truncate text-xs xs:text-sm leading-tight">{guest.purpose}</p>
             </div>
             
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-              <span className="truncate">{guest.phone}</span>
-            </div>
+            {guest.phone && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Phone className="h-2.5 w-2.5 xs:h-3 xs:w-3 flex-shrink-0" />
+                <a 
+                  href={`tel:${guest.phone}`} 
+                  className="truncate hover:underline hover:text-primary transition-colors"
+                  title="Hubungi via telepon"
+                >
+                  {guest.phone}
+                </a>
+              </div>
+            )}
 
             {guest.scheduledDate && (
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
-                <span className="truncate text-xs">
-                  Jadwal: {formatDate(guest.scheduledDate)}
+              <div className="flex items-start xs:items-center gap-1 text-muted-foreground">
+                <Calendar className="h-2.5 w-2.5 xs:h-3 xs:w-3 flex-shrink-0 mt-0.5 xs:mt-0" />
+                <span className="truncate text-[11px] xs:text-xs">
+                  <span className="hidden xs:inline">Jadwal: </span>
+                  {formatDate(guest.scheduledDate)}
                   {guest.scheduledTime && ` ${guest.scheduledTime}`}
                 </span>
               </div>

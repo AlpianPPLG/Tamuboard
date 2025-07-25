@@ -58,13 +58,13 @@ function HomePage() {
         onGuestAdded={handleGuestUpdate}
       />
       
-      <main className="flex-1 w-full px-3 sm:px-4 py-4 sm:py-6 overflow-hidden mb-4">
-        <div className="space-y-4 sm:space-y-6 h-full">
+      <main className="flex-1 w-full px-2 sm:px-4 py-3 sm:py-6 overflow-hidden mb-4">
+        <div className="space-y-3 sm:space-y-6 h-full">
           {/* Summary */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold">Daftar Tamu</h2>
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <h2 className="text-lg sm:text-2xl font-bold">Daftar Tamu</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {filteredGuests.length} dari {guests.length} tamu
               </p>
             </div>
