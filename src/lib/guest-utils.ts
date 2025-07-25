@@ -133,8 +133,18 @@ export function getGuestInitials(name: string): string {
     .slice(0, 2);
 }
 
-export function formatDate(date: Date): string {
-  return date.toLocaleDateString('id-ID', {
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return 'Tanggal tidak valid';
+  
+  const dateObj = date instanceof Date ? date : new Date(date);
+  
+  // Check if the date is valid
+  if (isNaN(dateObj.getTime())) {
+    console.error('Invalid date provided to formatDate:', date);
+    return 'Tanggal tidak valid';
+  }
+  
+  return dateObj.toLocaleDateString('id-ID', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
