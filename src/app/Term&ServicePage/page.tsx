@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { BackButton } from '@/components/ui/back-button';
-import { ForwardButton } from '@/components/ui/forward-button';
+import { PageHeader } from '@/components/navigation/page-header';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
@@ -10,10 +9,7 @@ export const metadata: Metadata = {
 export default function TermsOfServicePage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="flex justify-between items-center mb-8">
-        <BackButton />
-        <ForwardButton variant="ghost" className="text-muted-foreground hover:text-foreground" />
-      </div>
+      <PageHeader showForwardButton={true} />
       
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Terms of Service</h1>
