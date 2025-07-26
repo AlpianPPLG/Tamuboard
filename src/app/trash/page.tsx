@@ -16,7 +16,7 @@ export default function TrashPage() {
   const [deletedGuests, setDeletedGuests] = useState<Guest[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
-  useLanguage();
+  const { t } = useLanguage();
 
   const loadDeletedGuests = () => {
     const guests = GuestStorage.getDeletedGuests();
