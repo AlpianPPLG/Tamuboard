@@ -1,8 +1,16 @@
 "use client"
 
+import { ReactNode } from "react";
+
 export type Language = 'id' | 'en';
 
 export interface Translations {
+  all: ReactNode;
+  date: ReactNode;
+  name: ReactNode;
+  newest: ReactNode;
+  oldest: ReactNode;
+  status: ReactNode;
   // Header
   appTitle: string;
   appSubtitle: string;
@@ -74,7 +82,7 @@ export const translations: Record<Language, Translations> = {
     appSubtitle: 'Sistem Pencatatan Tamu Digital',
     searchPlaceholder: 'Cari tamu...',
     addGuest: 'Tambah Tamu',
-    
+
     // Form
     fullName: 'Nama Lengkap',
     institution: 'Instansi/Perusahaan',
@@ -87,33 +95,33 @@ export const translations: Record<Language, Translations> = {
     notes: 'Catatan (Opsional)',
     checkIn: 'Check In',
     updateData: 'Perbarui Data',
-    
+
     // Categories
     vip: 'VIP',
     regular: 'Biasa',
     supplier: 'Supplier',
     intern: 'Siswa PKL',
-    
+
     // Status
     checkedIn: 'Check In',
     checkedOut: 'Check Out',
-    
+
     // Time periods
     morning: 'Pagi',
     afternoon: 'Siang',
     evening: 'Sore',
-    
+
     // Actions
     edit: 'Edit Data',
     delete: 'Hapus',
     viewDetail: 'Lihat Detail',
     checkOut: 'Check Out',
-    
+
     // Feedback
     rating: 'Rating',
     feedback: 'Feedback',
     submitFeedback: 'Kirim Feedback',
-    
+
     // Stats
     todayGuests: 'Tamu Hari Ini',
     currentlyCheckedIn: 'Sedang Check In',
@@ -121,16 +129,22 @@ export const translations: Record<Language, Translations> = {
     thisYear: 'Tahun Ini',
     vipGuests: 'Tamu VIP',
     scheduledToday: 'Jadwal Hari Ini',
-    
+
     // Messages
     successCheckIn: 'berhasil check in!',
     successCheckOut: 'telah check out',
     successUpdate: 'berhasil diperbarui!',
     successDelete: 'berhasil dihapus',
-    
+
     // Footer
     madeWith: 'Made with',
     allRightsReserved: 'All rights reserved',
+    all: undefined,
+    date: undefined,
+    name: undefined,
+    newest: undefined,
+    oldest: undefined,
+    status: undefined
   },
   en: {
     // Header
@@ -138,7 +152,7 @@ export const translations: Record<Language, Translations> = {
     appSubtitle: 'Digital Guest Registration System',
     searchPlaceholder: 'Search guests...',
     addGuest: 'Add Guest',
-    
+
     // Form
     fullName: 'Full Name',
     institution: 'Institution/Company',
@@ -151,33 +165,33 @@ export const translations: Record<Language, Translations> = {
     notes: 'Notes (Optional)',
     checkIn: 'Check In',
     updateData: 'Update Data',
-    
+
     // Categories
     vip: 'VIP',
     regular: 'Regular',
     supplier: 'Supplier',
     intern: 'Intern',
-    
+
     // Status
     checkedIn: 'Checked In',
     checkedOut: 'Checked Out',
-    
+
     // Time periods
     morning: 'Morning',
     afternoon: 'Afternoon',
     evening: 'Evening',
-    
+
     // Actions
     edit: 'Edit Data',
     delete: 'Delete',
     viewDetail: 'View Detail',
     checkOut: 'Check Out',
-    
+
     // Feedback
     rating: 'Rating',
     feedback: 'Feedback',
     submitFeedback: 'Submit Feedback',
-    
+
     // Stats
     todayGuests: 'Today\'s Guests',
     currentlyCheckedIn: 'Currently Checked In',
@@ -185,16 +199,22 @@ export const translations: Record<Language, Translations> = {
     thisYear: 'This Year',
     vipGuests: 'VIP Guests',
     scheduledToday: 'Scheduled Today',
-    
+
     // Messages
     successCheckIn: 'successfully checked in!',
     successCheckOut: 'has checked out',
     successUpdate: 'successfully updated!',
     successDelete: 'successfully deleted',
-    
+
     // Footer
     madeWith: 'Made with',
     allRightsReserved: 'All rights reserved',
+    all: undefined,
+    date: undefined,
+    name: undefined,
+    newest: undefined,
+    oldest: undefined,
+    status: undefined
   },
 };
 

@@ -35,6 +35,7 @@ export class GuestStorage {
           'visitDate' in item &&
           typeof (item as Record<string, unknown>).visitDate === 'string' &&
           'id' in item &&
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           typeof (item as any).id === 'string'
         ) {
           const raw = item as StoredGuest;
@@ -159,6 +160,7 @@ export class GuestStorage {
     if (!guest) return false;
 
     // Remove deletion metadata and restore to checked-out status
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { deletedAt, deletedBy, ...rest } = guest;
     const updatedGuest = {
       ...rest,

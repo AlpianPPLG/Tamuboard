@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Search, Plus, Filter, Users, BarChart3, Languages, Trash2 } from "lucide-react";
+import { Search, Plus, Users, BarChart3, Languages, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
