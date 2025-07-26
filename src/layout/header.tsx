@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Search, Plus, Filter, Users, BarChart3, Languages } from "lucide-react";
+import { Search, Plus, Filter, Users, BarChart3, Languages, Trash2 } from "lucide-react";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +20,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { GuestForm } from "@/forms/guest-form";
-import { FilterDialog } from "@/dialogs/filter-dialog";
 import { StatsDialog } from "@/dialogs/stats-dialog";
 import { FilterOptions } from "@/types/guest";
 import { useLanguage } from "@/contexts/language-context";
+import { AdvancedSearchDialog } from "@/dialogs/advanced-search-dialog";
+import { GuestStorage } from "@/lib/guest-stotrage";
+import { SavedFilters } from "@/components/saved-filters";
 
 interface HeaderProps {
   searchValue: string;
@@ -41,10 +44,29 @@ export function Header({
 }: HeaderProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const { setLanguage, t } = useLanguage();
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Load available tags from storage
+    const guests = GuestStorage.getGuests();
+    const allTags = new Set<string>();
+    
+    guests.forEach(guest => {
+      if (guest.tags) {
+        guest.tags.forEach(tag => allTags.add(tag));
+      }
+    });
+    
+    setAvailableTags(Array.from(allTags));
+  }, []);
 
   const handleGuestAdded = () => {
     setShowAddDialog(false);
     onGuestAdded();
+  };
+
+  const handleFiltersChange = (newFilters: FilterOptions) => {
+    onFiltersChange(newFilters);
   };
 
   return (
@@ -79,16 +101,18 @@ export function Header({
               />
             </div>
 
-            {/* Filter */}
-            <FilterDialog filters={filters} onFiltersChange={onFiltersChange}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 sm:h-9 sm:w-9 p-0"
-              >
-                <Filter className="h-3 w-3 sm:h-4 sm:w-4" />
-              </Button>
-            </FilterDialog>
+            {/* Saved Filters */}
+            <SavedFilters 
+              currentFilters={filters}
+              onSelectFilter={handleFiltersChange}
+            />
+
+            {/* Advanced Search */}
+            <AdvancedSearchDialog 
+              filters={filters} 
+              onFiltersChange={handleFiltersChange}
+              availableTags={availableTags}
+            />
 
             {/* Stats */}
             <StatsDialog>
@@ -137,6 +161,13 @@ export function Header({
                 <GuestForm onSuccess={handleGuestAdded} />
               </DialogContent>
             </Dialog>
+
+            {/* Trash Link */}
+            <Button asChild variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9 p-0">
+              <Link href="/trash" title="Tempat Sampah">
+                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+              </Link>
+            </Button>
 
             {/* Theme Toggle */}
             <div className="hidden sm:block">

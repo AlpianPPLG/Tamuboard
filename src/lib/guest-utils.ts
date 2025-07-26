@@ -95,6 +95,13 @@ export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
   if (filters.category && filters.category !== 'all') {
     filtered = filtered.filter((guest) => guest.category === filters.category);
   }
+
+  // Tags filter
+  if (filters.tags && filters.tags.length > 0) {
+    filtered = filtered.filter(guest => 
+      guest.tags && filters.tags?.some(tag => guest.tags?.includes(tag))
+    );
+  }
   // Sort
   filtered.sort((a, b) => {
     let aValue: SortableValue;

@@ -16,7 +16,7 @@ export interface Guest {
   visitDate: Date;
   checkInTime: string;
   checkOutTime?: string;
-  status: 'checked-in' | 'checked-out';
+  status: 'checked-in' | 'checked-out' | 'deleted';
   notes?: string;
   avatar?: string;
   privacySettings?: PrivacySettings;
@@ -25,6 +25,9 @@ export interface Guest {
   reminderSettings?: ReminderSettings;
   reminderSentAt?: Date;
   expectedDuration?: ExpectedDuration;
+  tags?: string[];
+  deletedAt?: Date;
+  deletedBy?: string;
 }
 
 export interface PrivacySettings {
@@ -92,14 +95,16 @@ export interface GuestStats {
   currentlyCheckedIn: number;
   vipGuests: number;
   scheduledToday: number;
+  deletedCount: number;
 }
 
 export interface FilterOptions {
   search: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: Date | string;
+  dateTo?: Date | string;
   status?: 'all' | 'checked-in' | 'checked-out';
   category?: 'all' | 'VIP' | 'regular' | 'supplier' | 'intern';
   sortBy: 'name' | 'date' | 'institution';
   sortOrder: 'asc' | 'desc';
+  tags?: string[];
 }

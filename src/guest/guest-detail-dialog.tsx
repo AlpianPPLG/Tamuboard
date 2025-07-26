@@ -34,6 +34,7 @@ import {
 
 import { DialogFooter } from '@/components/ui/dialog';
 import { GuestStorage } from '@/lib/guest-stotrage';
+import { TagManagement } from '@/components/tag-management';
 
 interface GuestDetailDialogProps {
   guest: Guest;
@@ -218,20 +219,25 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
 
           {/* Guest Details */}
           <div className="space-y-3 sm:space-y-4">
-            {detailItems.map((item, index) => {
-              const IconComponent = item.icon;
-              return (
-                <div key={index} className="flex items-start gap-2 sm:gap-3">
-                  <IconComponent className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 text-muted-foreground flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground">
-                      {item.label}
-                    </p>
-                    <p className="text-sm sm:text-base break-words">{item.value}</p>
+            <div className="space-y-4">
+              {detailItems.map((item, index) => (
+                <div key={index} className="space-y-1">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <item.icon className="h-4 w-4 mr-2" />
+                    <span>{item.label}</span>
                   </div>
+                  <p className="text-sm pl-6">{item.value}</p>
                 </div>
-              );
-            })}
+              ))}
+              
+              {/* Tag Management */}
+              <div className="pt-2">
+                <TagManagement 
+                  guest={currentGuest} 
+                  onUpdate={onUpdate || (() => {})} 
+                />
+              </div>
+            </div>
           </div>
 
           <Separator />

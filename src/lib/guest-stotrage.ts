@@ -9,7 +9,11 @@ const STORAGE_KEY = 'buku-tamu-guests';
 type StoredGuest = Omit<Guest, 'visitDate'> & { visitDate: string };
 
 export class GuestStorage {
-  static getGuests(): Guest[] {
+  private static readonly TRASH_KEY = `${STORAGE_KEY}-trash`;
+  private static readonly TAGS_KEY = `${STORAGE_KEY}-tags`;
+
+  // Get all active guests (not deleted by default)
+  static getGuests(includeDeleted: boolean = false): Guest[] {
     if (typeof window === 'undefined') return [];
 
     try {
@@ -18,28 +22,59 @@ export class GuestStorage {
 
       const parsed: unknown = JSON.parse(stored);
 
-      // Validasi hasil parse
+      // Validate parse result
       if (!Array.isArray(parsed)) return [];
 
-      return parsed.map((item: unknown) => {
+      // Process and filter guests
+      const guests: Guest[] = [];
+      
+      for (const item of parsed) {
         if (
           typeof item === 'object' &&
           item !== null &&
           'visitDate' in item &&
-          typeof (item as Record<string, unknown>).visitDate === 'string'
+          typeof (item as Record<string, unknown>).visitDate === 'string' &&
+          'id' in item &&
+          typeof (item as any).id === 'string'
         ) {
           const raw = item as StoredGuest;
-          return {
-            ...raw,
-            visitDate: new Date(raw.visitDate),
-            // Ensure backward compatibility
+          const guest: Guest = {
+            id: raw.id,
+            name: raw.name || '',
+            institution: raw.institution || '',
+            purpose: raw.purpose || '',
+            phone: raw.phone || '',
+            email: raw.email,
             category: raw.category || 'regular',
             visitTime: raw.visitTime || getVisitTime(),
+            scheduledDate: raw.scheduledDate ? new Date(raw.scheduledDate) : undefined,
+            scheduledTime: raw.scheduledTime,
+            feedback: raw.feedback,
+            rating: raw.rating,
+            visitDate: new Date(raw.visitDate),
+            checkInTime: raw.checkInTime || new Date().toLocaleTimeString('id-ID'),
+            checkOutTime: raw.checkOutTime,
+            status: raw.status || 'checked-in',
+            notes: raw.notes,
+            avatar: raw.avatar,
+            privacySettings: raw.privacySettings,
+            specialRequirements: raw.specialRequirements || [],
+            autoCheckoutReminder: raw.autoCheckoutReminder,
+            reminderSettings: raw.reminderSettings,
+            reminderSentAt: raw.reminderSentAt ? new Date(raw.reminderSentAt) : undefined,
+            expectedDuration: raw.expectedDuration,
+            tags: raw.tags || [],
+            deletedAt: raw.deletedAt ? new Date(raw.deletedAt) : undefined,
+            deletedBy: raw.deletedBy,
           };
+          
+          if (includeDeleted || guest.status !== 'deleted') {
+            guests.push(guest);
+          }
         }
-        // Jika struktur tidak sesuai, abaikan entri ini
-        return null;
-      }).filter((g): g is Guest => g !== null);
+      }
+      
+      return guests;
     } catch (error) {
       console.error('Error loading guests:', error);
       return [];
@@ -90,19 +125,131 @@ export class GuestStorage {
     return guests[index];
   }
 
-  static deleteGuest(id: string): boolean {
-    const guests = this.getGuests();
-    const filtered = guests.filter((g) => g.id !== id);
+  // Move guest to trash instead of permanent deletion
+  static deleteGuest(id: string, deletedBy: string = 'system'): boolean {
+    const guest = this.getGuests(true).find(g => g.id === id);
+    if (!guest) return false;
 
-    if (filtered.length === guests.length) return false;
+    // Update guest status to deleted and set deletion timestamp
+    const updatedGuest = {
+      ...guest,
+      status: 'deleted' as const,
+      deletedAt: new Date(),
+      deletedBy,
+    };
 
-    this.saveGuests(filtered);
+    // Save the updated guest
+    const guests = this.getGuests(true).filter(g => g.id !== id);
+    guests.unshift(updatedGuest);
+    this.saveGuests(guests);
+    
+    return true;
+  }
+
+  // Permanently remove a guest from the system
+  static permanentDelete(id: string): boolean {
+    const guests = this.getGuests(true).filter(g => g.id !== id);
+    this.saveGuests(guests);
+    return true;
+  }
+
+  // Restore a guest from trash
+  static restoreGuest(id: string): boolean {
+    const guest = this.getGuests(true).find(g => g.id === id && g.status === 'deleted');
+    if (!guest) return false;
+
+    // Remove deletion metadata and restore to checked-out status
+    const { deletedAt, deletedBy, ...rest } = guest;
+    const updatedGuest = {
+      ...rest,
+      status: 'checked-out' as const,
+    };
+
+    // Save the restored guest
+    const guests = this.getGuests(true).filter(g => g.id !== id);
+    guests.unshift(updatedGuest);
+    this.saveGuests(guests);
+    
+    return true;
+  }
+
+  // Get all deleted guests
+  static getDeletedGuests(): Guest[] {
+    return this.getGuests(true).filter(g => g.status === 'deleted');
+  }
+
+  // Tag management
+  static getAllTags(): string[] {
+    if (typeof window === 'undefined') return [];
+    
+    try {
+      const stored = localStorage.getItem(this.TAGS_KEY);
+      if (!stored) return [];
+      
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Error loading tags:', error);
+      return [];
+    }
+  }
+
+  static saveTags(tags: string[]): void {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const uniqueTags = Array.from(new Set(tags.map(tag => tag.trim()).filter(Boolean)));
+      localStorage.setItem(this.TAGS_KEY, JSON.stringify(uniqueTags));
+    } catch (error) {
+      console.error('Error saving tags:', error);
+    }
+  }
+
+  static addTagToGuest(guestId: string, tag: string): boolean {
+    const guests = this.getGuests(true);
+    const guest = guests.find(g => g.id === guestId);
+    if (!guest) return false;
+
+    const updatedTags = [...new Set([...(guest.tags || []), tag.trim()])];
+    const updatedGuest = {
+      ...guest,
+      tags: updatedTags,
+    };
+
+    // Update tags list
+    const allTags = this.getAllTags();
+    const newTags = [tag.trim()].filter(t => !allTags.includes(t));
+    if (newTags.length > 0) {
+      this.saveTags([...allTags, ...newTags]);
+    }
+
+    // Update guest
+    const updatedGuests = guests.map(g => (g.id === guestId ? updatedGuest : g));
+    this.saveGuests(updatedGuests);
+    
+    return true;
+  }
+
+  static removeTagFromGuest(guestId: string, tag: string): boolean {
+    const guests = this.getGuests(true);
+    const guest = guests.find(g => g.id === guestId);
+    if (!guest || !guest.tags) return false;
+
+    const updatedGuest = {
+      ...guest,
+      tags: guest.tags.filter(t => t !== tag),
+    };
+
+    const updatedGuests = guests.map(g => (g.id === guestId ? updatedGuest : g));
+    this.saveGuests(updatedGuests);
+    
     return true;
   }
 
   static addFeedback(id: string, rating: number, feedback: string): Guest | null {
     return this.updateGuest(id, { rating, feedback });
   }
+
   static getStats(): GuestStats {
     const guests = this.getGuests();
     const today = new Date();
@@ -116,6 +263,10 @@ export class GuestStorage {
       new Date(g.scheduledDate) >= startOfDay && 
       new Date(g.scheduledDate) < new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000)
     );
+    
+    // Get deleted count from trash
+    const deletedCount = this.getDeletedGuests().length;
+    
     return {
       totalToday: todayGuests.length,
       totalThisMonth: guests.filter((g) => g.visitDate >= startOfMonth).length,
@@ -123,6 +274,7 @@ export class GuestStorage {
       currentlyCheckedIn: guests.filter((g) => g.status === 'checked-in').length,
       vipGuests: todayGuests.filter((g) => g.category === 'VIP').length,
       scheduledToday: scheduledToday.length,
+      deletedCount,
     };
   }
 
@@ -140,3 +292,6 @@ export class GuestStorage {
     });
   }
 }
+
+export type { Guest };
+export type { GuestStats };
