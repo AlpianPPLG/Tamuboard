@@ -1,10 +1,11 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Guest } from '@/types/guest';
 import { GuestStorage } from '@/lib/guest-stotrage';
 import { Button } from '@/components/ui/button';
-import { Trash2, Undo2, Search, X } from 'lucide-react';
+import { Trash2, Undo2, Search, X, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -91,15 +92,28 @@ export default function TrashPage() {
     (guest.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
   );
 
+  const router = useRouter();
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">Tempat Sampah</h1>
-            <p className="text-sm text-muted-foreground">
-              {deletedGuests.length} tamu di tempat sampah
-            </p>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => router.push('/')}
+              className="h-10 w-10"
+              title="Kembali ke Beranda"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Tempat Sampah</h1>
+              <p className="text-sm text-muted-foreground">
+                {deletedGuests.length} tamu di tempat sampah
+              </p>
+            </div>
           </div>
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
