@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Search, Plus, Users, BarChart3, Languages, Trash2 } from "lucide-react";
+import { Search, Plus, Users, BarChart3, Languages, Trash2, Keyboard } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -45,6 +45,50 @@ export function Header({
   const [showAddDialog, setShowAddDialog] = useState(false);
   const { setLanguage, t } = useLanguage();
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [isMac, setIsMac] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if the platform is Mac for modifier key display
+  useEffect(() => {
+    setIsMac(/Mac|iPod|iPhone|iPad/.test(navigator.platform));
+  }, []);
+
+  // Refs for dialog triggers
+  const addGuestTriggerRef = useRef<HTMLButtonElement>(null);
+  const statsTriggerRef = useRef<HTMLButtonElement>(null);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      const target = e.target as HTMLElement;
+      const isInputFocused = 
+        target.tagName === 'INPUT' || 
+        target.tagName === 'TEXTAREA' || 
+        target.isContentEditable;
+      
+      if (isInputFocused) return;
+
+      // Focus search on Cmd+F / Ctrl+F
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      // Add new guest on 'N'
+      else if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        addGuestTriggerRef.current?.click();
+      }
+      // Open stats on 'S'
+      else if (e.key.toLowerCase() === 's' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        statsTriggerRef.current?.click();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     // Load available tags from storage
@@ -93,12 +137,24 @@ export function Header({
             {/* Search */}
             <div className="relative flex-1 sm:flex-initial sm:block">
               <Search className="absolute left-2 sm:left-3 top-1/2 h-3 w-3 sm:h-4 sm:w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={t.searchPlaceholder}
-                value={searchValue}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full sm:w-48 md:w-64 pl-7 sm:pl-9 h-8 sm:h-9 text-sm"
-              />
+              <div className="relative w-full sm:w-48 md:w-64 group/search">
+                <Input
+                  ref={searchInputRef}
+                  placeholder={t.searchPlaceholder}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-7 sm:pl-9 h-8 sm:h-9 text-sm pr-16"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:flex">
+                    <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>F
+                  </kbd>
+                  <div className="absolute -right-1 -top-8 hidden group-hover/search:flex items-center gap-1 bg-popover text-popover-foreground text-xs px-2 py-1 rounded border shadow-sm whitespace-nowrap">
+                    <Keyboard className="h-3 w-3" />
+                    <span>Shortcuts: {isMac ? '⌘' : 'Ctrl'}+F, N, S</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Saved Filters */}
@@ -117,11 +173,16 @@ export function Header({
             {/* Stats */}
             <StatsDialog>
               <Button
+                ref={statsTriggerRef}
                 variant="outline"
                 size="sm"
-                className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                className="h-8 w-8 sm:h-9 sm:w-9 p-0 relative group"
+                title="View statistics (S)"
               >
                 <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <kbd className="absolute -right-1 -top-1 hidden sm:flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[8px] leading-none p-0.5">
+                  S
+                </kbd>
               </Button>
             </StatsDialog>
 
@@ -148,10 +209,16 @@ export function Header({
             {/* Add Guest */}
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
-                <Button size="sm" className="h-8 sm:h-9">
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                  <span className="hidden xs:inline">{t.addGuest.split(' ')[0]}</span>
-                  <span className="hidden sm:inline ml-1">{t.addGuest.split(' ')[1] || ''}</span>
+                <Button 
+                  ref={addGuestTriggerRef}
+                  size="sm" 
+                  className="h-8 sm:h-9 relative group"
+                >
+                  <Plus className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{t.addGuest}</span>
+                  <kbd className="absolute -right-1 -top-1 hidden sm:flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[8px] leading-none p-0.5">
+                    N
+                  </kbd>
                 </Button>
               </DialogTrigger>
               <DialogContent className="w-[95vw] max-w-md mx-auto">

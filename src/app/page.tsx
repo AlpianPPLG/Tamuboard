@@ -1,14 +1,18 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from '@/layout/header';
 import { GuestList } from '@/guest/guest-list';
 import { GuestStorage } from '@/lib/guest-stotrage';
 import { filterGuests } from '@/lib/guest-utils';
 import { Guest, FilterOptions } from '@/types/guest';
 import { LanguageProvider } from '@/contexts/language-context';
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcut';
+import { toast } from 'sonner';
+import { Plus } from 'lucide-react';
 
 function HomePage() {
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [guests, setGuests] = useState<Guest[]>([]);
   const [filteredGuests, setFilteredGuests] = useState<Guest[]>([]);
   const [searchValue, setSearchValue] = useState('');
@@ -39,6 +43,37 @@ function HomePage() {
   useEffect(() => {
     loadGuests();
   }, []);
+
+  // Set up keyboard shortcuts
+  const { showShortcuts } = useKeyboardShortcuts({
+    'ctrl+f': {
+      handler: (e: KeyboardEvent) => {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      },
+      description: 'Fokus ke kolom pencarian',
+      preventDefault: true
+    },
+    'ctrl+n': {
+      handler: () => {
+        // This would open the add guest form
+        // You'll need to implement this based on your UI
+        toast.info('Membuka form tambah tamu baru');
+        // Example: router.push('/add-guest');
+      },
+      description: 'Tambah tamu baru'
+    },
+    'ctrl+?': {
+      handler: (e: KeyboardEvent, showShortcutsFn?: () => void) => {
+        e.preventDefault();
+        if (showShortcutsFn) {
+          showShortcutsFn();
+        }
+      },
+      description: 'Tampilkan semua pintasan keyboard',
+      preventDefault: true
+    }
+  });
 
   const handleFiltersChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
