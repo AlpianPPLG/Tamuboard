@@ -17,7 +17,10 @@ interface FormState {
 }
 
 export async function submitContactForm(prevState: FormState, formData: FormData): Promise<FormState> {
+  console.log('Form submission started');
+  
   try {
+    // Extract form data
     const rawFormData = {
       name: formData.get('name') as string,
       email: formData.get('email') as string,
@@ -25,30 +28,65 @@ export async function submitContactForm(prevState: FormState, formData: FormData
       message: formData.get('message') as string,
     };
 
+    console.log('Raw form data received:', { 
+      hasName: !!rawFormData.name,
+      hasEmail: !!rawFormData.email,
+      hasSubject: !!rawFormData.subject,
+      hasMessage: !!rawFormData.message,
+      env: {
+        emailUser: process.env.EMAIL_USER ? 'Set' : 'Not Set',
+        nodeEnv: process.env.NODE_ENV || 'development'
+      }
+    });
+
     // Validate form data
     const validatedData = contactSchema.safeParse(rawFormData);
     
     if (!validatedData.success) {
       const errors = validatedData.error.flatten().fieldErrors;
+      const errorMessages = Object.values(errors).flat();
+      
+      console.error('Validation failed:', { errors: errorMessages });
+      
       return { 
         success: false, 
         message: 'Validasi gagal',
-        errors: Object.values(errors).flat()
+        errors: errorMessages
       };
     }
 
-    // Send email
-    await sendContactEmail(validatedData.data);
+    console.log('Form data validated successfully');
+    
+    try {
+      // Send email
+      console.log('Attempting to send contact email...');
+      await sendContactEmail(validatedData.data);
+      console.log('Contact email sent successfully');
+      
+      return { 
+        success: true, 
+        message: 'Pesan berhasil dikirim! Kami akan segera menghubungi Anda.' 
+      };
+    } catch (emailError) {
+      console.error('Error sending contact email:', emailError);
+      
+      // Check if it's a known error from the email service
+      const errorMessage = emailError instanceof Error 
+        ? emailError.message 
+        : 'Gagal mengirim email';
+      
+      return { 
+        success: false, 
+        message: `Gagal mengirim pesan: ${errorMessage}`,
+        errors: []
+      };
+    }
+  } catch (error) {
+    console.error('Unexpected error in submitContactForm:', error);
     
     return { 
-      success: true, 
-      message: 'Pesan berhasil dikirim! Kami akan segera menghubungi Anda.' 
-    };
-  } catch (error) {
-    console.error('Error submitting contact form:', error);
-    return { 
       success: false, 
-      message: 'Terjadi kesalahan saat mengirim pesan. Silakan coba lagi nanti.',
+      message: 'Terjadi kesalahan tak terduga. Silakan coba lagi nanti.',
       errors: []
     };
   }

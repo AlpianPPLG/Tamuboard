@@ -13,18 +13,41 @@ interface ContactFormData {
 /**
  * Transporter for sending emails
  */ 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// Create a test account if in development
+const createTransporter = async () => {
+  if (process.env.NODE_ENV === 'development') {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+  }
+
+  // For production, use a more reliable email service
+  if (!process.env.EMAIL_SERVER || !process.env.EMAIL_PORT || !process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    throw new Error('Missing required email configuration');
+  }
+
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_SERVER,
+    port: parseInt(process.env.EMAIL_PORT),
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+};
+
+const transporterPromise = createTransporter();
 
 /**
  * Send contact email
  */ 
 export async function sendContactEmail(data: ContactFormData) {
+  const transporter = await transporterPromise;
   const mailOptions = {
     from: `"${data.name}" <${process.env.EMAIL_USER}>`,
     to: 'Nova07pplg@gmail.com',
@@ -71,6 +94,7 @@ export async function sendContactEmail(data: ContactFormData) {
 
 // Fungsi untuk mengirim email feedback tamu
 export async function sendFeedbackEmail(guestName: string, feedback: string) {
+  const transporter = await transporterPromise;
   const mailOptions = {
     from: `"Buku Tamu Digital" <${process.env.EMAIL_USER}>`,
     to: 'Nova07pplg@gmail.com',
