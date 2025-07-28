@@ -8,12 +8,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { GuestStorage } from "@/lib/guest-stotrage";
 import { Guest } from "@/types/guest";
 import { useLanguage } from "@/contexts/language-context";
 import { toast } from "sonner";
-import { Star, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface FeedbackDialogProps {
   guest: Guest;
@@ -28,24 +28,40 @@ export function FeedbackDialog({
   onOpenChange,
   onUpdate,
 }: FeedbackDialogProps) {
-  const [rating, setRating] = useState<number>(guest.rating ?? 0);
-  const [feedback, setFeedback] = useState<string>(guest.feedback ?? "");
+  const [feedback, setFeedback] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { t } = useLanguage();
+  useLanguage();
 
   const handleSubmit = async () => {
-    if (rating === 0) {
-      toast.error("Silakan berikan rating terlebih dahulu");
+    if (!feedback.trim()) {
+      toast.error("Silakan isi feedback Anda");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await GuestStorage.addFeedback(guest.id, rating, feedback);
-      toast.success("Feedback berhasil disimpan!", {
-        description: "Terima kasih atas feedback Anda",
+      // Send feedback via API
+      const response = await fetch("/api/send-feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          guestName: guest.name,
+          feedback: feedback 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengirim feedback");
+      }
+
+      toast.success("Terima kasih atas feedback Anda!", {
+        description: "Kami sangat menghargai masukan Anda",
         icon: <CheckCircle className="h-4 w-4" />,
       });
+      
+      setFeedback("");
       onUpdate?.();
       onOpenChange(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,68 +76,47 @@ export function FeedbackDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md mx-auto">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Feedback Kunjungan</DialogTitle>
+          <DialogTitle>Beri Feedback</DialogTitle>
+          <DialogDescription>
+            Masukan Anda sangat berharga untuk meningkatkan layanan kami.
+          </DialogDescription>
         </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Rating */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">{t.rating}</label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  className="p-1 hover:scale-110 transition-transform"
-                  disabled={isSubmitting}
-                  aria-label={`Rate ${star} out of 5`}
-                  aria-pressed={star <= rating}
-                >
-                  <Star
-                    className={`h-6 w-6 ${
-                      star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Feedback */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">{t.feedback}</label>
+        <div className="grid gap-4 py-2">
+          <div className="space-y-2">
+            <label
+              htmlFor="feedback"
+              className="text-sm font-medium leading-none"
+            >
+              Masukan dan Saran
+            </label>
             <Textarea
+              id="feedback"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Bagikan pengalaman kunjungan Anda..."
-              className="min-h-20"
+              placeholder="Bagaimana pengalaman Anda menggunakan layanan kami?"
+              className="min-h-[120px]"
               disabled={isSubmitting}
             />
           </div>
-
-          {/* Actions */}
-          <div className="flex gap-2 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              Batal
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="flex-1"
-              disabled={isSubmitting || rating === 0}
-            >
-              {isSubmitting ? "Menyimpan..." : t.submitFeedback}
-            </Button>
-          </div>
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
+            type="button"
+          >
+            Batal
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting || !feedback.trim()}
+            type="button"
+          >
+            {isSubmitting ? "Mengirim..." : "Kirim Feedback"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
