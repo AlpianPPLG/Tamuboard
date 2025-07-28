@@ -40,6 +40,7 @@ export default function TrashTestPage() {
     return () => {
       unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTestData = () => {
@@ -161,12 +162,12 @@ export default function TrashTestPage() {
       <div className="mt-12 p-6 bg-muted/50 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Test Instructions</h2>
         <ol className="list-decimal pl-5 space-y-2">
-          <li>Click "Create Test Guest" to add a test guest</li>
-          <li>Click "Move to Trash" to move a guest to the trash</li>
+          <li>Click Create Test Guest to add a test guest</li>
+          <li>Click Move to Trash to move a guest to the trash</li>
           <li>Verify the guest appears in the Trash section with the correct expiration time</li>
           <li>Test restoring a guest from trash</li>
           <li>Test permanent deletion of a guest</li>
-          <li>Use "Reset Test Data" to clean up after testing</li>
+          <li>Use Reset Test Data to clean up after testing</li>
         </ol>
       </div>
     </div>

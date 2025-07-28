@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import React from 'react';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ShortcutDefinition {
   handler: (e: KeyboardEvent, showShortcuts?: () => void) => void;
   description: string;
@@ -20,6 +21,7 @@ type ShortcutMap = {
 }
 
 export function useKeyboardShortcuts(shortcuts: ShortcutMap): { showShortcuts: () => void } {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
 
   const handleKeyDown = useCallback(

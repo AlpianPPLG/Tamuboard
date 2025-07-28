@@ -44,6 +44,7 @@ function HomePage() {
   }, []);
 
   // Set up keyboard shortcuts
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { showShortcuts } = useKeyboardShortcuts({
     'ctrl+f': {
       handler: (e: KeyboardEvent) => {
