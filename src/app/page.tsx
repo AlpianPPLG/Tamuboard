@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Header } from '@/layout/header';
 import { GuestList } from '@/guest/guest-list';
 import { GuestStorage } from '@/lib/guest-stotrage';
@@ -9,7 +9,6 @@ import { Guest, FilterOptions } from '@/types/guest';
 import { LanguageProvider } from '@/contexts/language-context';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcut';
 import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
 
 function HomePage() {
   const searchInputRef = useRef<HTMLInputElement>(null);

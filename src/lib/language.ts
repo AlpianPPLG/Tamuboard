@@ -69,10 +69,32 @@ export interface Translations {
   successCheckOut: string;
   successUpdate: string;
   successDelete: string;
+  restoreSuccess: string;
+  restoreError: string;
+  deleteSuccess: string;
+  deleteError: string;
+  bulkRestoreSuccess: string;
+  bulkRestoreError: string;
+  bulkDeleteSuccess: string;
+  bulkDeleteError: string;
   
   // Footer
   madeWith: string;
   allRightsReserved: string;
+  
+  // Trash
+  trash: {
+    title: string;
+    empty: string;
+    restore: string;
+    deletePermanent: string;
+    deleteConfirmation: string;
+    restoreConfirmation: string;
+    expiresToday: string;
+    expiresInOneDay: string;
+    expiresInDays: string;
+    deletedOn: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -135,10 +157,32 @@ export const translations: Record<Language, Translations> = {
     successCheckOut: 'telah check out',
     successUpdate: 'berhasil diperbarui!',
     successDelete: 'berhasil dihapus',
+    restoreSuccess: 'Tamu berhasil dikembalikan',
+    restoreError: 'Gagal mengembalikan tamu',
+    deleteSuccess: 'Tamu berhasil dihapus permanen',
+    deleteError: 'Gagal menghapus tamu',
+    bulkRestoreSuccess: '{count} tamu berhasil dikembalikan',
+    bulkRestoreError: 'Gagal mengembalikan beberapa tamu',
+    bulkDeleteSuccess: '{count} tamu berhasil dihapus permanen',
+    bulkDeleteError: 'Gagal menghapus beberapa tamu',
 
     // Footer
     madeWith: 'Made with',
     allRightsReserved: 'All rights reserved',
+    
+    // Trash
+    trash: {
+      title: 'Tempat Sampah',
+      empty: 'Tidak ada data di tempat sampah',
+      restore: 'Kembalikan',
+      deletePermanent: 'Hapus Permanen',
+      deleteConfirmation: 'Apakah Anda yakin ingin menghapus permanen tamu ini? Tindakan ini tidak dapat dibatalkan.',
+      restoreConfirmation: 'Apakah Anda yakin ingin mengembalikan tamu ini?',
+      expiresToday: 'Kedaluwarsa hari ini',
+      expiresInOneDay: '1 hari lagi',
+      expiresInDays: '{days} hari lagi',
+      deletedOn: 'Dihapus pada',
+    },
     all: undefined,
     date: undefined,
     name: undefined,
@@ -201,14 +245,36 @@ export const translations: Record<Language, Translations> = {
     scheduledToday: 'Scheduled Today',
 
     // Messages
-    successCheckIn: 'successfully checked in!',
+    successCheckIn: 'Successfully checked in!',
     successCheckOut: 'has checked out',
     successUpdate: 'successfully updated!',
     successDelete: 'successfully deleted',
+    restoreSuccess: 'Guest restored successfully',
+    restoreError: 'Failed to restore guest',
+    deleteSuccess: 'Guest permanently deleted',
+    deleteError: 'Failed to delete guest',
+    bulkRestoreSuccess: 'Restored {count} guests',
+    bulkRestoreError: 'Failed to restore some guests',
+    bulkDeleteSuccess: 'Permanently deleted {count} guests',
+    bulkDeleteError: 'Failed to delete some guests',
 
     // Footer
     madeWith: 'Made with',
     allRightsReserved: 'All rights reserved',
+    
+    // Trash
+    trash: {
+      title: 'Trash',
+      empty: 'Trash is empty',
+      restore: 'Restore',
+      deletePermanent: 'Delete Permanently',
+      deleteConfirmation: 'Are you sure you want to permanently delete this guest? This action cannot be undone.',
+      restoreConfirmation: 'Are you sure you want to restore this guest?',
+      expiresToday: 'Expires today',
+      expiresInOneDay: '1 day remaining',
+      expiresInDays: '{days} days remaining',
+      deletedOn: 'Deleted on',
+    },
     all: undefined,
     date: undefined,
     name: undefined,

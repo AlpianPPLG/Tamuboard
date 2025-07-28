@@ -127,23 +127,78 @@ export class GuestStorage {
   }
 
   // Move guest to trash instead of permanent deletion
-  static deleteGuest(id: string, deletedBy: string = 'system'): boolean {
-    const guest = this.getGuests(true).find(g => g.id === id);
-    if (!guest) return false;
-
-    // Update guest status to deleted and set deletion timestamp
-    const updatedGuest = {
-      ...guest,
-      status: 'deleted' as const,
-      deletedAt: new Date(),
-      deletedBy,
-    };
-
-    // Save the updated guest
-    const guests = this.getGuests(true).filter(g => g.id !== id);
-    guests.unshift(updatedGuest);
-    this.saveGuests(guests);
+  static moveToTrash(id: string, deletedBy: string = 'system'): boolean {
+    const guests = this.getGuests(true);
+    const index = guests.findIndex(g => g.id === id);
     
+    if (index === -1) return false;
+    
+    // Mark as deleted with current timestamp
+    guests[index] = {
+      ...guests[index],
+      status: 'deleted',
+      deletedAt: new Date(),
+      deletedBy
+    };
+    
+    this.saveGuests(guests);
+    return true;
+  }
+
+  // Alias for backward compatibility
+  static deleteGuest(id: string, deletedBy: string = 'system'): boolean {
+    return this.moveToTrash(id, deletedBy);
+  }
+
+  // Get all guests in trash
+  static getTrash(): Guest[] {
+    const guests = this.getGuests(true);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    return guests.filter(guest => 
+      guest.status === 'deleted' && 
+      guest.deletedAt && 
+      guest.deletedAt >= thirtyDaysAgo
+    );
+  }
+
+  // Permanently delete guests that have been in trash for more than 30 days
+  static cleanupExpiredTrash(): number {
+    const guests = this.getGuests(true);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const remainingGuests = guests.filter(guest => {
+      // Keep guests that are not deleted or were deleted within the last 30 days
+      return guest.status !== 'deleted' || 
+             !guest.deletedAt || 
+             guest.deletedAt >= thirtyDaysAgo;
+    });
+    
+    const deletedCount = guests.length - remainingGuests.length;
+    if (deletedCount > 0) {
+      this.saveGuests(remainingGuests);
+    }
+    
+    return deletedCount;
+  }
+
+  // Restore a guest from trash
+  static restoreFromTrash(id: string): boolean {
+    const guests = this.getGuests(true);
+    const index = guests.findIndex(g => g.id === id);
+    
+    if (index === -1 || guests[index].status !== 'deleted') return false;
+    
+    guests[index] = {
+      ...guests[index],
+      status: 'checked-out',
+      deletedAt: undefined,
+      deletedBy: undefined
+    };
+    
+    this.saveGuests(guests);
     return true;
   }
 

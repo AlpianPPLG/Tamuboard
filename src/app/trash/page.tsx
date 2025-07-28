@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Guest } from '@/types/guest';
 import { GuestStorage } from '@/lib/guest-stotrage';
+import TrashManager from '@/lib/trash-manager';
 import { Button } from '@/components/ui/button';
-import { Trash2, Undo2, Search, X, ArrowLeft } from 'lucide-react';
+import { Trash2, Undo2, Search, X, ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -20,51 +21,109 @@ export default function TrashPage() {
   const { t } = useLanguage();
 
   const loadDeletedGuests = () => {
-    const guests = GuestStorage.getDeletedGuests();
+    const guests = TrashManager.getTrash();
     setDeletedGuests(guests);
   };
 
   useEffect(() => {
     loadDeletedGuests();
+    
+    // Subscribe to trash changes
+    const unsubscribe = TrashManager.onChange(loadDeletedGuests);
+    
+    // Initial cleanup check - run cleanup on component mount
+    const cleanup = async () => {
+      // Force cleanup of any expired items
+      const guests = GuestStorage.getGuests(true);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const remainingGuests = guests.filter(guest => 
+        guest.status !== 'deleted' || 
+        !guest.deletedAt || 
+        new Date(guest.deletedAt) >= thirtyDaysAgo
+      );
+      
+      if (remainingGuests.length < guests.length) {
+        GuestStorage.saveGuests(remainingGuests);
+        loadDeletedGuests();
+      }
+    };
+    
+    cleanup();
+    
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleRestore = (id: string) => {
-    const success = GuestStorage.restoreGuest(id);
+    const success = TrashManager.restoreFromTrash(id);
     if (success) {
-      toast.success('Tamu berhasil dikembalikan');
-      loadDeletedGuests();
+      toast.success(t.restoreSuccess);
     } else {
-      toast.error('Gagal mengembalikan tamu');
+      toast.error(t.restoreError);
     }
   };
 
   const handlePermanentDelete = (id: string) => {
-    const success = GuestStorage.permanentDelete(id);
-    if (success) {
-      toast.success('Tamu berhasil dihapus permanen');
-      loadDeletedGuests();
-    } else {
-      toast.error('Gagal menghapus tamu');
-    }
+    const guests = GuestStorage.getGuests(true);
+    const updatedGuests = guests.filter(guest => guest.id !== id);
+    GuestStorage.saveGuests(updatedGuests);
+    toast.success(t.deleteSuccess);
+    loadDeletedGuests();
   };
 
   const handleBulkAction = (action: 'restore' | 'delete') => {
     const ids = Array.from(selectedGuests);
-    const success = ids.every(id => 
-      action === 'restore' 
-        ? GuestStorage.restoreGuest(id)
-        : GuestStorage.permanentDelete(id)
-    );
+    let success = true;
+    
+    for (const id of ids) {
+      try {
+        if (action === 'restore') {
+          if (!TrashManager.restoreFromTrash(id)) {
+            success = false;
+          }
+        } else {
+          const guests = GuestStorage.getGuests(true);
+          const updatedGuests = guests.filter(guest => guest.id !== id);
+          GuestStorage.saveGuests(updatedGuests);
+        }
+      } catch (error) {
+        console.error(`Error during ${action}:`, error);
+        success = false;
+      }
+    }
 
     if (success) {
-      toast.success(
-        `${ids.length} tamu berhasil ${action === 'restore' ? 'dikembalikan' : 'dihapus permanen'}`
-      );
+      const message = action === 'restore' 
+        ? `${ids.length} ${t.restoreSuccess.toLowerCase()}`
+        : `${ids.length} ${t.deleteSuccess.toLowerCase()}`;
+      
+      toast.success(message);
       setSelectedGuests(new Set());
       loadDeletedGuests();
     } else {
-      toast.error(`Gagal ${action === 'restore' ? 'mengembalikan' : 'menghapus'} beberapa tamu`);
+      const errorMessage = action === 'restore' 
+        ? t.restoreError
+        : t.deleteError;
+      toast.error(errorMessage);
     }
+  };
+  
+  const getDaysRemaining = (deletedAt: Date): number => {
+    const now = new Date();
+    const thirtyDaysLater = new Date(deletedAt);
+    thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
+    
+    const diffTime = thirtyDaysLater.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  };
+  
+  const getDaysRemainingText = (days: number): string => {
+    if (days === 0) return t.trash.expiresToday;
+    if (days === 1) return t.trash.expiresInOneDay;
+    return t.trash.expiresInDays.replace('{days}', days.toString());
   };
 
   const toggleSelectGuest = (id: string) => {
@@ -85,12 +144,20 @@ export default function TrashPage() {
     }
   };
 
-  const filteredGuests = deletedGuests.filter(guest => 
-    guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    guest.institution.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    guest.phone.includes(searchTerm) ||
-    (guest.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
-  );
+  const filteredGuests = deletedGuests
+    .filter(guest => 
+      guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      guest.institution.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      guest.phone.includes(searchTerm) ||
+      (guest.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+    )
+    .sort((a, b) => {
+      // Sort by days remaining (ascending)
+      if (a.deletedAt && b.deletedAt) {
+        return a.deletedAt.getTime() - b.deletedAt.getTime();
+      }
+      return 0;
+    });
 
   const router = useRouter();
 
@@ -236,25 +303,34 @@ export default function TrashPage() {
                         </div>
                       </td>
                       <td className="p-4 align-middle text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleRestore(guest.id)}
-                            className="h-8 w-8 p-0"
-                            title="Kembalikan"
-                          >
-                            <Undo2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handlePermanentDelete(guest.id)}
-                            className="h-8 w-8 p-0"
-                            title="Hapus Permanen"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                          {guest.deletedAt && (
+                            <div className="flex items-center text-xs text-muted-foreground mb-2 sm:mb-0 sm:mr-2">
+                              <Clock className="h-3 w-3 mr-1" />
+                              <span>{getDaysRemainingText(getDaysRemaining(guest.deletedAt))}</span>
+                              <span className="mx-1">•</span>
+                              <Calendar className="h-3 w-3 mr-1" />
+                              <span>{format(guest.deletedAt, 'dd MMM yyyy, HH:mm', { locale: id })}</span>
+                            </div>
+                          )}
+                          <div className="flex gap-2 w-full sm:w-auto">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRestore(guest.id)}
+                              className="text-xs sm:text-sm flex-1 sm:flex-initial"
+                            >
+                              <Undo2 className="h-3 w-3 mr-1" /> {t.trash.restore}
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handlePermanentDelete(guest.id)}
+                              className="text-xs sm:text-sm flex-1 sm:flex-initial"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" /> {t.trash.deletePermanent}
+                            </Button>
+                          </div>
                         </div>
                       </td>
                     </tr>
