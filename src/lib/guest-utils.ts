@@ -2,8 +2,10 @@
 
 import { Guest, FilterOptions } from '@/types/guest';
 
+// Type for sortable values
 type SortableValue = string | number;
 
+// Get current visit time
 export function getVisitTime(): 'morning' | 'afternoon' | 'evening' {
   const hour = new Date().getHours();
   if (hour < 12) return 'morning';
@@ -11,6 +13,7 @@ export function getVisitTime(): 'morning' | 'afternoon' | 'evening' {
   return 'evening';
 }
 
+// Get category color
 export function getCategoryColor(category: Guest['category']): string {
   switch (category) {
     case 'VIP':
@@ -25,6 +28,7 @@ export function getCategoryColor(category: Guest['category']): string {
   }
 }
 
+// Get category text
 export function getCategoryText(category: Guest['category'], language: 'id' | 'en' = 'id'): string {
   const translations = {
     id: {
@@ -43,6 +47,7 @@ export function getCategoryText(category: Guest['category'], language: 'id' | 'e
   return translations[language][category];
 }
 
+// Get visit time text
 export function getVisitTimeText(time: Guest['visitTime'], language: 'id' | 'en' = 'id'): string {
   const translations = {
     id: {
@@ -59,6 +64,7 @@ export function getVisitTimeText(time: Guest['visitTime'], language: 'id' | 'en'
   return translations[language][time];
 }
 
+// Filter guests
 export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
   let filtered = [...guests];
 
@@ -102,6 +108,7 @@ export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
       guest.tags && filters.tags?.some(tag => guest.tags?.includes(tag))
     );
   }
+
   // Sort
   filtered.sort((a, b) => {
     let aValue: SortableValue;
@@ -131,6 +138,7 @@ export function filterGuests(guests: Guest[], filters: FilterOptions): Guest[] {
   return filtered;
 }
 
+// Get guest initials
 export function getGuestInitials(name: string): string {
   return name
     .split(' ')
@@ -140,6 +148,7 @@ export function getGuestInitials(name: string): string {
     .slice(0, 2);
 }
 
+// Format date
 export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return 'Tanggal tidak valid';
   
@@ -147,7 +156,7 @@ export function formatDate(date: Date | string | null | undefined): string {
   
   // Check if the date is valid
   if (isNaN(dateObj.getTime())) {
-    console.error('Invalid date provided to formatDate:', date);
+      console.error('Invalid date provided to formatDate:', date);
     return 'Tanggal tidak valid';
   }
   
@@ -159,6 +168,7 @@ export function formatDate(date: Date | string | null | undefined): string {
   });
 }
 
+// Format time
 export function formatTime(time: string): string {
   return time;
 }
@@ -174,6 +184,7 @@ export function getStatusColor(status: Guest['status']): string {
   }
 }
 
+// Get status text
 export function getStatusText(status: Guest['status']): string {
   switch (status) {
     case 'checked-in':

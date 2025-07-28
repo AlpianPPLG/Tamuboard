@@ -3,7 +3,7 @@ import React from 'react';
 interface ShortcutItem {
   key: string;
   description: string;
-}
+} 
 
 interface ShortcutListProps {
   shortcuts: ShortcutItem[];

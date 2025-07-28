@@ -18,17 +18,19 @@ interface AutoCheckoutSettingsProps {
   guest: Guest;
   onUpdate?: () => void;
 }
-
 export function AutoCheckoutSettings({ guest, onUpdate }: AutoCheckoutSettingsProps) {
   const [enabled, setEnabled] = useState<boolean>(
     guest.autoCheckoutReminder?.enabled ?? false
   );
+  
   const [reminderTime, setReminderTime] = useState<'morning' | 'afternoon' | 'evening'>(
     guest.autoCheckoutReminder?.reminderTime ?? 'afternoon'
   );
+  
   const [duration, setDuration] = useState<number>(
     guest.expectedDuration?.duration ?? 60
   );
+
   const [durationUnit, setDurationUnit] = useState<'minutes' | 'hours'>(
     guest.expectedDuration?.unit ?? 'minutes'
   );

@@ -12,13 +12,14 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 import { toast } from "sonner";
 
+// — interface — // 
 interface SpecialRequirementsFormProps {
   guest: Guest & { id: string };
   onUpdate?: (requirements: SpecialRequirement[]) => void;
   className?: string;
 }
 
-// Template untuk kebutuhan berdasarkan tujuan kunjungan
+// — konstan — //
 const TEMPLATE_MAP: Record<string, Omit<SpecialRequirement, "id">[]> = {
   Meeting: [
     { type: "other", description: "Proyektor" },
@@ -71,20 +72,20 @@ export function SpecialRequirementsForm({
   const inputRef = useRef<HTMLInputElement>(null);
   const guestRef = useRef(guest);
 
-  // Update guest ref when guest changes
+  // — helper konstan — //
   useEffect(() => {
     guestRef.current = guest;
     setRequirements(guest.specialRequirements ?? []);
   }, [guest]);
 
-  // Persist changes to storage and notify parent
+  // — helper konstan — //
   useEffect(() => {
     if (onUpdate) {
       onUpdate(requirements);
     }
   }, [requirements, onUpdate]);
 
-  // Handle adding a new requirement
+  // — helper konstan — //
   const handleAdd = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!newReq.description.trim()) {
@@ -100,15 +101,15 @@ export function SpecialRequirementsForm({
     inputRef.current?.focus();
   };
 
-  // Handle removing a requirement
+  // — helper konstan — //
   const handleRemove = (id: string) => {
     setRequirements((prev) => prev.filter((r) => r.id !== id));
     toast.success("Kebutuhan dihapus");
   };
 
-  // Add template requirements
+  // — helper konstan — //
   const addTemplate = (template: Omit<SpecialRequirement, "id">) => {
-    // Check if requirement already exists
+    // — helper konstan — //
     const exists = requirements.some(
       (req) => req.description.toLowerCase() === template.description.toLowerCase()
     );
@@ -125,7 +126,7 @@ export function SpecialRequirementsForm({
     toast.success("Template kebutuhan ditambahkan");
   };
 
-  // Get templates based on guest's purpose or show all if no match
+  // — helper konstan — //
   const templates = TEMPLATE_MAP[guest.purpose] || [
     ...TEMPLATE_MAP.Meeting,
     ...TEMPLATE_MAP.Training,

@@ -28,12 +28,9 @@ export default function TrashPage() {
   useEffect(() => {
     loadDeletedGuests();
     
-    // Subscribe to trash changes
     const unsubscribe = TrashManager.onChange(loadDeletedGuests);
     
-    // Initial cleanup check - run cleanup on component mount
     const cleanup = async () => {
-      // Force cleanup of any expired items
       const guests = GuestStorage.getGuests(true);
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -41,7 +38,7 @@ export default function TrashPage() {
       const remainingGuests = guests.filter(guest => 
         guest.status !== 'deleted' || 
         !guest.deletedAt || 
-        new Date(guest.deletedAt) >= thirtyDaysAgo
+        guest.deletedAt >= thirtyDaysAgo
       );
       
       if (remainingGuests.length < guests.length) {
@@ -119,7 +116,7 @@ export default function TrashPage() {
     const diffTime = thirtyDaysLater.getTime() - now.getTime();
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   };
-  
+
   const getDaysRemainingText = (days: number): string => {
     if (days === 0) return t.trash.expiresToday;
     if (days === 1) return t.trash.expiresInOneDay;

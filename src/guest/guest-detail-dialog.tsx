@@ -48,7 +48,6 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
   const [currentGuest, setCurrentGuest] = useState<Guest | null>(initialGuest);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch the latest guest data when dialog opens
   useEffect(() => {
     const fetchGuestData = async () => {
       if (open && initialGuest?.id) {
@@ -73,7 +72,6 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
     setShowEditForm(false);
     onUpdate?.();
     
-    // Refresh the guest data after successful update
     if (initialGuest?.id) {
       const guests = GuestStorage.getGuests();
       const updatedGuest = guests.find(g => g.id === initialGuest.id) || null;
@@ -81,7 +79,6 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
     }
   };
 
-  // Handle loading state
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -100,7 +97,6 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
     );
   }
 
-  // Handle case when guest is not found
   if (!currentGuest) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -197,7 +193,6 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
         </DialogHeader>
 
         <div className="space-y-4 sm:space-y-6">
-          {/* Header with Avatar and Status */}
           <div className="flex items-center gap-3 sm:gap-4">
             <Avatar className="h-12 w-12 sm:h-16 sm:w-16 flex-shrink-0">
               <AvatarFallback className="bg-primary text-primary-foreground text-sm sm:text-lg">
@@ -217,7 +212,6 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
 
           <Separator />
 
-          {/* Guest Details */}
           <div className="space-y-3 sm:space-y-4">
             <div className="space-y-4">
               {detailItems.map((item, index) => (

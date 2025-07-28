@@ -3,11 +3,13 @@
 import { Guest, GuestStats } from '@/types/guest';
 import { getVisitTime } from './guest-utils';
 
+// Kunci untuk menyimpan data tamu di localStorage  
 const STORAGE_KEY = 'buku-tamu-guests';
 
 // Tipe hasil parsing JSON dari localStorage
 type StoredGuest = Omit<Guest, 'visitDate'> & { visitDate: string };
 
+// Kelas untuk mengelola data tamu  
 export class GuestStorage {
   private static readonly TRASH_KEY = `${STORAGE_KEY}-trash`;
   private static readonly TAGS_KEY = `${STORAGE_KEY}-tags`;
@@ -28,6 +30,7 @@ export class GuestStorage {
       // Process and filter guests
       const guests: Guest[] = [];
       
+      // Loop through parsed guests
       for (const item of parsed) {
         if (
           typeof item === 'object' &&
@@ -82,6 +85,7 @@ export class GuestStorage {
     }
   }
 
+  // Save guests to localStorage  
   static saveGuests(guests: Guest[]): void {
     if (typeof window === 'undefined') return;
 
@@ -92,6 +96,7 @@ export class GuestStorage {
     }
   }
 
+  // Add a new guest  
   static addGuest(
     guest: Omit<Guest, 'id' | 'visitDate' | 'checkInTime' | 'status' | 'visitTime'>
   ): Guest {
@@ -110,6 +115,7 @@ export class GuestStorage {
     return newGuest;
   }
 
+  // Update an existing guest  
   static updateGuest(id: string, updates: Partial<Guest>): Guest | null {
     const guests = this.getGuests();
     const index = guests.findIndex((g) => g.id === id);
@@ -126,7 +132,7 @@ export class GuestStorage {
     return guests[index];
   }
 
-  // Move guest to trash instead of permanent deletion
+    // Move guest to trash instead of permanent deletion
   static moveToTrash(id: string, deletedBy: string = 'system'): boolean {
     const guests = this.getGuests(true);
     const index = guests.findIndex(g => g.id === id);
@@ -251,6 +257,7 @@ export class GuestStorage {
     }
   }
 
+  // Save tags to localStorage
   static saveTags(tags: string[]): void {
     if (typeof window === 'undefined') return;
     
@@ -262,6 +269,7 @@ export class GuestStorage {
     }
   }
 
+  // Add a tag to a guest
   static addTagToGuest(guestId: string, tag: string): boolean {
     const guests = this.getGuests(true);
     const guest = guests.find(g => g.id === guestId);
@@ -287,6 +295,7 @@ export class GuestStorage {
     return true;
   }
 
+  // Remove a tag from a guest
   static removeTagFromGuest(guestId: string, tag: string): boolean {
     const guests = this.getGuests(true);
     const guest = guests.find(g => g.id === guestId);
@@ -303,10 +312,12 @@ export class GuestStorage {
     return true;
   }
 
+    // Add feedback to a guest
   static addFeedback(id: string, rating: number, feedback: string): Guest | null {
     return this.updateGuest(id, { rating, feedback });
   }
 
+  // Get statistics
   static getStats(): GuestStats {
     const guests = this.getGuests();
     const today = new Date();
@@ -335,6 +346,7 @@ export class GuestStorage {
     };
   }
 
+  // Check out a guest
   static checkOutGuest(id: string): Guest | null {
     const guest = this.getGuests().find(g => g.id === id);
     if (!guest) return null;

@@ -91,6 +91,7 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
     setShowEditDialog(false);
     onUpdate();
   };
+
   const handleDelete = () => {
     const success = GuestStorage.deleteGuest(guest.id);
     if (success) {

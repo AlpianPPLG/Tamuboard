@@ -19,7 +19,7 @@ interface SpecialRequirementsFormProps {
   onUpdate?: () => void;
 }
 
-// — helper konstan —
+// — helper konstan — //
 const TEMPLATE_MAP: Record<string, Omit<SpecialRequirement, "id">[]> = {
   Meeting: [
     { type: "other", description: "Proyektor" },
@@ -37,12 +37,14 @@ const TEMPLATE_MAP: Record<string, Omit<SpecialRequirement, "id">[]> = {
   ],
 };
 
+// — helper konstan — //
 const TYPE_LABEL: Record<SpecialRequirement["type"], string> = {
   food: "Makanan",
   accommodation: "Akomodasi",
   other: "Lainnya",
 };
 
+// — helper konstan — //
 export function SpecialRequirementsForm({
   guest,
   onUpdate,
@@ -55,13 +57,13 @@ export function SpecialRequirementsForm({
     description: "",
   });
 
-  // Stabilkan ref agar useEffect tidak memicu ulang
+  // — helper konstan — //
   const guestRef = useRef(guest);
   useEffect(() => {
     guestRef.current = guest;
   }, [guest]);
 
-  // Persist ke storage
+  // — helper konstan — //
   useEffect(() => {
     GuestStorage.updateGuest(guestRef.current.id, {
       specialRequirements: requirements,
@@ -69,6 +71,7 @@ export function SpecialRequirementsForm({
     onUpdate?.();
   }, [requirements, onUpdate]);
 
+  // — helper konstan — //
   const handleAdd = () => {
     if (!newReq.description.trim()) return;
     setRequirements((prev) => [
@@ -78,11 +81,14 @@ export function SpecialRequirementsForm({
     setNewReq({ type: "other", description: "" });
   };
 
+  // — helper konstan — //
   const handleRemove = (id: string) =>
     setRequirements((prev) => prev.filter((r) => r.id !== id));
 
+  // — helper konstan — //
   const templates = TEMPLATE_MAP[guest.purpose] ?? [];
 
+  // — helper konstan — //
   return (
     <div className="space-y-4">
       <div>
@@ -92,7 +98,7 @@ export function SpecialRequirementsForm({
         </p>
       </div>
 
-      {/* Template */}
+      {/* — Template — */}
       {templates.length > 0 && (
         <div className="space-y-2">
           <Label>Template ({guest.purpose})</Label>
@@ -120,7 +126,7 @@ export function SpecialRequirementsForm({
         </div>
       )}
 
-      {/* Form tambah */}
+      {/* — Form tambah — */}
       <div className="flex gap-2">
         <Select
           value={newReq.type}
@@ -151,7 +157,7 @@ export function SpecialRequirementsForm({
         </Button>
       </div>
 
-      {/* Daftar */}
+      {/* — Daftar — */}
       {requirements.length > 0 && (
         <div className="space-y-2">
           <Label>Daftar Kebutuhan</Label>

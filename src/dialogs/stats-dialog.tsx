@@ -35,7 +35,7 @@ export function StatsDialog({ children }: StatsDialogProps) {
     currentlyCheckedIn: 0,
     vipGuests: 0,
     scheduledToday: 0,
-    deletedCount: 0, // <-- tambahkan ini
+    deletedCount: 0,
   });
   const { t } = useLanguage();
 
@@ -53,7 +53,7 @@ export function StatsDialog({ children }: StatsDialogProps) {
       });
     }
   }, [open]);
-
+  
   const statCards = [
     {
       title: t.todayGuests,

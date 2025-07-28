@@ -1,5 +1,8 @@
 import nodemailer from 'nodemailer';
 
+/**
+ * Interface for contact form data
+ */ 
 interface ContactFormData {
   name: string;
   email: string;
@@ -7,6 +10,9 @@ interface ContactFormData {
   message: string;
 }
 
+/**
+ * Transporter for sending emails
+ */ 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -15,7 +21,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Fungsi untuk mengirim email dari form kontak
+/**
+ * Send contact email
+ */ 
 export async function sendContactEmail(data: ContactFormData) {
   const mailOptions = {
     from: `"${data.name}" <${process.env.EMAIL_USER}>`,

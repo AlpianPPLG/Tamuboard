@@ -15,12 +15,12 @@ type TestTrashProps = {
 
 export function TestTrashItem({ guest, onRestore, onDelete }: TestTrashProps) {
   const { t } = useLanguage();
-  
+
   const getDaysRemaining = (deletedAt: Date): number => {
     const now = new Date();
     const thirtyDaysLater = new Date(deletedAt);
     thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-    
+
     const diffTime = thirtyDaysLater.getTime() - now.getTime();
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   };
@@ -28,7 +28,7 @@ export function TestTrashItem({ guest, onRestore, onDelete }: TestTrashProps) {
   const getDaysRemainingText = (days: number): string => {
     if (days === 0) return t.trash.expiresToday;
     if (days === 1) return t.trash.expiresInOneDay;
-    return t.trash.expiresInDays.replace('{days}', days.toString());
+    return t.trash.expiresInDays.replace("{days}", days.toString());
   };
 
   if (!guest.deletedAt) return null;

@@ -41,7 +41,6 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
   const [localFilters, setLocalFilters] = useState<FilterOptions>(filters);
   const { t } = useLanguage();
 
-  /* ---------- helper ---------- */
   const handleApply = () => {
     onFiltersChange(localFilters);
     setOpen(false);
@@ -61,7 +60,6 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
     onFiltersChange(resetFilters);
   };
 
-  /* ---------- type guard ---------- */
   const safeFormat = (value: string | Date | undefined): Date | undefined =>
     typeof value === "string" ? new Date(value) : value;
 
@@ -74,7 +72,7 @@ export function FilterDialog({ children, filters, onFiltersChange }: FilterDialo
         </DialogHeader>
 
         <div className="space-y-3 sm:space-y-4">
-          {/* --- Date Range --- */}
+          {/*  --- Date Range --- */}
           <div className="space-y-2">
             <Label>Rentang Tanggal</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

@@ -25,7 +25,7 @@ class ReminderService {
   }
 
   private constructor() {
-    if (typeof window === 'undefined') return; // SSR guard
+  if (typeof window === 'undefined') return;
     const savedSettings = localStorage.getItem('reminderSettings');
     if (savedSettings) {
       try {

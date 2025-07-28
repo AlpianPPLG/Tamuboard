@@ -11,7 +11,6 @@ interface ShortcutDefinition {
 }
 
 type ShortcutHandler = (e: KeyboardEvent) => void;
-
 type ShortcutMap = {
   [key: string]: {
     handler: ShortcutHandler;
@@ -76,7 +75,6 @@ export function useKeyboardShortcuts(shortcuts: ShortcutMap): { showShortcuts: (
     };
   }, [handleKeyDown]);
 
-  // Helper function to show available shortcuts
   const showShortcuts = useCallback(() => {
     const shortcutList = Object.entries(shortcuts).map(([key, { description }]) => ({
       key: key

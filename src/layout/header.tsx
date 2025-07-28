@@ -48,16 +48,13 @@ export function Header({
   const [isMac, setIsMac] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Check if the platform is Mac for modifier key display
   useEffect(() => {
     setIsMac(/Mac|iPod|iPhone|iPad/.test(navigator.platform));
   }, []);
 
-  // Refs for dialog triggers
   const addGuestTriggerRef = useRef<HTMLButtonElement>(null);
   const statsTriggerRef = useRef<HTMLButtonElement>(null);
 
-  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in input fields
@@ -91,7 +88,6 @@ export function Header({
   }, []);
 
   useEffect(() => {
-    // Load available tags from storage
     const guests = GuestStorage.getGuests();
     const allTags = new Set<string>();
     

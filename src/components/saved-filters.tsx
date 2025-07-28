@@ -22,7 +22,6 @@ export function SavedFilters({ currentFilters, onSelectFilter }: SavedFiltersPro
   const [filterName, setFilterName] = useState('');
   const [isDefault, setIsDefault] = useState(false);
 
-  // Load saved filters
   useEffect(() => {
     loadSavedFilters();
   }, []);
@@ -52,7 +51,6 @@ export function SavedFilters({ currentFilters, onSelectFilter }: SavedFiltersPro
     
     toast.success(`Filter "${savedFilter.name}" berhasil disimpan`);
   };
-
   const handleDeleteFilter = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
     if (window.confirm('Apakah Anda yakin ingin menghapus filter ini?')) {
@@ -64,8 +62,8 @@ export function SavedFilters({ currentFilters, onSelectFilter }: SavedFiltersPro
         toast.error('Gagal menghapus filter');
       }
     }
+  
   };
-
   const handleSetDefault = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
     const updatedFilter = SavedFiltersService.updateFilter(id, { isDefault: true });

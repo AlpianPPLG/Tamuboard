@@ -9,7 +9,6 @@ import { Plus, Trash2, RotateCcw } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { TestTrashItem } from "./test-utils";
 
-// Helper to create a test guest
 const createTestGuest = (id: number): Omit<Guest, "id"> => ({
   name: `Test Guest ${id}`,
   institution: `Test Institution ${id}`,
@@ -30,11 +29,9 @@ export default function TrashTestPage() {
   const [trashItems, setTrashItems] = useState<Guest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load test data
   useEffect(() => {
     loadTestData();
     
-    // Subscribe to trash changes
     const unsubscribe = TrashManager.onChange(loadTrash);
     
     return () => {
@@ -84,7 +81,6 @@ export default function TrashTestPage() {
   };
 
   const resetTestData = () => {
-    // Remove all test guests
     const guests = GuestStorage.getGuests(true);
     const filteredGuests = guests.filter(g => !g.name.startsWith("Test Guest"));
     GuestStorage.saveGuests(filteredGuests);

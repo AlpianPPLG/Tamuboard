@@ -26,7 +26,6 @@ export function AdvancedSearchDialog({
   const [localFilters, setLocalFilters] = useState<FilterOptions>(filters);
   const [selectedTags, setSelectedTags] = useState<string[]>(filters.tags || []);
 
-  // Sync local filters when props change
   useEffect(() => {
     setLocalFilters(filters);
     setSelectedTags(filters.tags || []);

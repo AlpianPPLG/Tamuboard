@@ -11,6 +11,12 @@ interface PrivacySettingsProps {
   onUpdate?: () => void;
 }
 
+/**
+ * Komponen untuk mengatur privasi tamu
+ *
+ * @param {PrivacySettingsProps} props Props untuk komponen ini
+ * @returns {JSX.Element} JSX element yang akan ditampilkan
+ */
 export function PrivacySettings({ guest, onUpdate }: PrivacySettingsProps) {
   const [privacySettings, setPrivacySettings] = useState({
     hideName: guest.privacySettings?.hideName ?? false,
@@ -18,7 +24,6 @@ export function PrivacySettings({ guest, onUpdate }: PrivacySettingsProps) {
     hideEmail: guest.privacySettings?.hideEmail ?? false,
   });
 
-  // Stabilkan referensi objek guest agar tidak memicu useEffect berulang
   const guestRef = useRef(guest);
   useEffect(() => {
     guestRef.current = guest;

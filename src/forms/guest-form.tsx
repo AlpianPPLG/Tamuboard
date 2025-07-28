@@ -42,7 +42,7 @@ import { SpecialRequirementsForm } from "@/components/special-requirements-form"
 import { PrivacySettings } from "@/components/privacy-settings";
 import { cn } from "@/lib/utils";
 
-// --- Schema ---
+// --- Schema --- //
 const guestSchema = z.object({
   name: z.string().min(2).max(50),
   institution: z.string().min(2).max(100),
@@ -61,7 +61,6 @@ interface GuestFormProps {
   onSuccess?: () => void;
 }
 
-// Helper function to get time of day as 'morning', 'afternoon', or 'evening'
 function getTimeOfDay(date: Date): 'morning' | 'afternoon' | 'evening' {
   const hour = date.getHours();
   if (hour < 12) return 'morning';
@@ -78,9 +77,6 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
   );
   const { t } = useLanguage();
 
-  // ——————————————————————————
-  // HOOK SELALU DIPANGGIL DI TOP-LEVEL
-  // ——————————————————————————
   const form = useForm<GuestFormData>({
     resolver: zodResolver(guestSchema),
     defaultValues: {
@@ -98,7 +94,6 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
     },
   });
 
-  // Jika edit mode tapi guest tidak ada → tampilkan placeholder
   if (mode === "edit" && !guest) {
     return (
       <div className="p-4 text-center space-y-4">
@@ -114,7 +109,6 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
     setError(null);
 
     try {
-      // Simulate progress
       for (let i = 0; i <= 100; i += 10) {
         await new Promise((resolve) => setTimeout(resolve, 50));
         setProgress(i);
@@ -124,7 +118,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
         ...data,
         id: guest?.id || Date.now().toString(),
         visitDate: new Date(),
-        visitTime: getTimeOfDay(new Date()), // Returns 'morning', 'afternoon', or 'evening'
+        visitTime: getTimeOfDay(new Date()),  // Returns 'morning', 'afternoon', or 'evening'
         checkInTime: new Date().toISOString(),
         status: "checked-in",
         specialRequirements: requirements || [],
