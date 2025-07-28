@@ -30,7 +30,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { GuestStorage } from "@/lib/guest-stotrage";
-import { Guest, GuestFormData } from "@/types/guest";
+import { Guest, GuestFormData, SpecialRequirement } from "@/types/guest";
 import { useLanguage } from "@/contexts/language-context";
 import { toast } from "sonner";
 import { Loader2, UserPlus, XCircle, CalendarIcon } from "lucide-react";
@@ -61,10 +61,21 @@ interface GuestFormProps {
   onSuccess?: () => void;
 }
 
+// Helper function to get time of day as 'morning', 'afternoon', or 'evening'
+function getTimeOfDay(date: Date): 'morning' | 'afternoon' | 'evening' {
+  const hour = date.getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'evening';
+}
+
 export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [requirements, setRequirements] = useState<SpecialRequirement[]>(
+    guest?.specialRequirements ?? []
+  );
   const { t } = useLanguage();
 
   // ——————————————————————————
@@ -100,31 +111,43 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
 
   const onSubmit = async (data: GuestFormData) => {
     setIsSubmitting(true);
-    setProgress(0);
     setError(null);
 
     try {
-      setProgress(20);
-      await new Promise((r) => setTimeout(r, 300));
-      setProgress(50);
-      await new Promise((r) => setTimeout(r, 300));
-      setProgress(80);
-      await new Promise((r) => setTimeout(r, 300));
-
-      if (mode === "edit") {
-        const updated = GuestStorage.updateGuest(guest!.id, data);
-        toast.success(`${updated?.name} ${t.successUpdate}`);
-      } else {
-        const created = GuestStorage.addGuest(data);
-        toast.success(`${created.name} ${t.successCheckIn}`);
+      // Simulate progress
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        setProgress(i);
       }
 
-      form.reset();
+      const guestData: Guest = {
+        ...data,
+        id: guest?.id || Date.now().toString(),
+        visitDate: new Date(),
+        visitTime: getTimeOfDay(new Date()), // Returns 'morning', 'afternoon', or 'evening'
+        checkInTime: new Date().toISOString(),
+        status: "checked-in",
+        specialRequirements: requirements || [],
+        checkOutTime: guest?.checkOutTime,
+        checkedInBy: guest?.checkedInBy || 'system',
+        checkedOutBy: guest?.checkedOutBy,
+        updatedAt: new Date().toISOString(),
+        createdAt: guest?.createdAt || new Date().toISOString(),
+      };
+
+      if (mode === "create") {
+        GuestStorage.addGuest(guestData);
+        toast.success("Tamu berhasil ditambahkan");
+      } else {
+        GuestStorage.updateGuest(guestData.id, guestData);
+        toast.success("Data tamu berhasil diperbarui");
+      }
+
       onSuccess?.();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Gagal menyimpan";
-      setError(msg);
-      toast.error("Gagal menyimpan!", { description: msg });
+      console.error("Error saving guest:", err);
+      setError("Terjadi kesalahan saat menyimpan data tamu");
+      toast.error("Gagal menyimpan data tamu");
     } finally {
       setIsSubmitting(false);
       setProgress(0);
@@ -154,9 +177,9 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
         <Tabs defaultValue="guest-info" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="guest-info">Info</TabsTrigger>
-            <TabsTrigger value="special-requirements">Kebutuhan</TabsTrigger>
-            <TabsTrigger value="auto-checkout">Check-out</TabsTrigger>
+            <TabsTrigger value="requirements">Kebutuhan</TabsTrigger>
             <TabsTrigger value="privacy">Privasi</TabsTrigger>
+            <TabsTrigger value="autoCheckout">Checkout</TabsTrigger>
           </TabsList>
 
           <TabsContent value="guest-info" className="space-y-6">
@@ -317,14 +340,38 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
           {/* Sub-form hanya jika guest sudah ada / tidak undefined */}
           {guest && (
             <>
-              <TabsContent value="special-requirements" className="space-y-6">
-                <SpecialRequirementsForm guest={guest} onUpdate={onSuccess} />
+              <TabsContent value="requirements" className="space-y-4">
+                <SpecialRequirementsForm
+                  guest={{
+                    ...form.getValues(),
+                    id: guest?.id || 'new',
+                    visitDate: new Date(),
+                    visitTime: getTimeOfDay(new Date()),
+                    checkInTime: new Date().toISOString(),
+                    status: "checked-in",
+                    specialRequirements: requirements,
+                    checkOutTime: guest?.checkOutTime,
+                    checkedInBy: guest?.checkedInBy || 'system',
+                    checkedOutBy: guest?.checkedOutBy,
+                    updatedAt: new Date().toISOString(),
+                    createdAt: guest?.createdAt || new Date().toISOString(),
+                  }}
+                  onUpdate={(updatedRequirements) => {
+                    setRequirements(updatedRequirements);
+                  }}
+                  className="border rounded-lg p-4"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Tambahkan kebutuhan khusus untuk tamu ini. Kebutuhan ini akan digunakan untuk mempersiapkan fasilitas yang diperlukan.
+                </p>
               </TabsContent>
-              <TabsContent value="auto-checkout" className="space-y-6">
-                <AutoCheckoutSettings guest={guest} onUpdate={onSuccess} />
-              </TabsContent>
+              
               <TabsContent value="privacy" className="space-y-6">
-                <PrivacySettings guest={guest} onUpdate={onSuccess} />
+                <PrivacySettings guest={guest || {}} onUpdate={onSuccess} />
+              </TabsContent>
+              
+              <TabsContent value="autoCheckout" className="space-y-6">
+                <AutoCheckoutSettings guest={guest || {}} onUpdate={onSuccess} />
               </TabsContent>
             </>
           )}

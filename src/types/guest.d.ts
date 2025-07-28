@@ -28,6 +28,10 @@ export interface Guest {
   tags?: string[];
   deletedAt?: Date;
   deletedBy?: string;
+  checkedInBy?: string;
+  checkedOutBy?: string | null;
+  updatedAt?: string;
+  createdAt?: string;
 }
 
 export interface PrivacySettings {
