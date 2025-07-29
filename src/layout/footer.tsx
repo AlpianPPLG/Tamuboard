@@ -27,7 +27,13 @@ export function Footer() {
               href="/Term&ServicePage" 
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              Full Terms & Conditions
+              Syarat & Ketentuan
+            </a>
+            <a 
+              href="/PanduanPengguna" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Panduan Pengguna
             </a>
           </div>
         </div>
