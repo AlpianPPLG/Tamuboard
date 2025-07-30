@@ -96,43 +96,55 @@ export function StatsDialog({ children }: StatsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-2xl mx-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
-            Statistik Kunjungan
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-[90vw] max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-4 pt-4 pb-2 sm:px-6 sm:pt-6 sm:pb-4 border-b">
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
+            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <span>Statistik Kunjungan</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
           {statCards.map((stat, idx) => {
             const Icon = stat.icon;
             return (
-              <Card key={idx}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-4 py-3">
-                  <CardTitle className="text-xs sm:text-sm font-medium">
+              <Card key={idx} className="h-full hover:shadow-md transition-all duration-200 border border-transparent hover:border-primary/20">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4">
+                  <CardTitle className="text-[13px] xs:text-sm font-medium line-clamp-2 leading-tight">
                     {stat.title}
                   </CardTitle>
-                  <Icon className={`h-3 w-3 sm:h-4 sm:w-4 ${stat.color}`} />
+                  <div className={`p-1.5 sm:p-2 rounded-full bg-opacity-10 ${stat.color.replace('text-', 'bg-')}`}>
+                    <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.color}`} />
+                  </div>
                 </CardHeader>
-                <CardContent className="px-4 py-2">
-                  <div className="text-xl sm:text-2xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
+                <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+                  <div className="text-xl sm:text-2xl font-bold mb-1.5">
+                    {stat.value}
+                  </div>
+                  <p className="text-[11px] xs:text-xs text-muted-foreground line-clamp-1">
                     {stat.title.includes("Hari Ini")
                       ? "Kunjungan hari ini"
                       : stat.title.includes("Bulan")
                       ? "Kunjungan bulan ini"
-                      : "Kunjungan tahun ini"}
+                      : stat.title.includes("Tahun")
+                      ? "Kunjungan tahun ini"
+                      : stat.title.includes("Sedang Berkunjung")
+                      ? "Tamu sedang berkunjung"
+                      : stat.title.includes("VIP")
+                      ? "Total tamu VIP"
+                      : "Jadwal kunjungan hari ini"}
                   </p>
                 </CardContent>
               </Card>
             );
           })}
         </div>
-
-        <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-muted/50 rounded-lg">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+        </div>
+        
+        <div className="p-3 sm:p-4 border-t bg-muted/30">
+          <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground">
+            <Clock className="h-3.5 w-3.5 flex-shrink-0" />
             <span>Data diperbarui secara real-time</span>
           </div>
         </div>

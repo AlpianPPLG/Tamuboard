@@ -14,6 +14,16 @@ export class GuestStorage {
   private static readonly TRASH_KEY = `${STORAGE_KEY}-trash`;
   private static readonly TAGS_KEY = `${STORAGE_KEY}-tags`;
 
+  // Check if a guest with the same name and phone already exists
+  static checkDuplicateGuest(name: string, phone: string, excludeId?: string): boolean {
+    const guests = this.getGuests();
+    return guests.some(guest => 
+      guest.name.toLowerCase() === name.toLowerCase() && 
+      guest.phone === phone &&
+      (!excludeId || guest.id !== excludeId)
+    );
+  }
+
   // Get all active guests (not deleted by default)
   static getGuests(includeDeleted: boolean = false): Guest[] {
     if (typeof window === 'undefined') return [];

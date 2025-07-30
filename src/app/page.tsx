@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Calendar, Clock, ShieldCheck, ArrowRight } from "lucide-react";
+import { Users, Calendar, Clock, ShieldCheck, ArrowRight, UserPlus, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -96,6 +96,106 @@ export default function LandingPage() {
                 Mulai Sekarang - Gratis
                 <ArrowRight className="h-4 w-4" />
               </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Fitur Unggulan</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-background p-6 rounded-lg shadow-sm border">
+              <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <UserPlus className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Pendaftaran Cepat</h3>
+              <p className="text-muted-foreground">Proses pendaftaran tamu yang cepat dan mudah dengan validasi data otomatis.</p>
+            </div>
+            <div className="bg-background p-6 rounded-lg shadow-sm border">
+              <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <ShieldCheck className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Keamanan Data</h3>
+              <p className="text-muted-foreground">Data tamu disimpan dengan aman dan hanya dapat diakses oleh pihak berwenang.</p>
+            </div>
+            <div className="bg-background p-6 rounded-lg shadow-sm border">
+              <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <BarChart3 className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Laporan Lengkap</h3>
+              <p className="text-muted-foreground">Dapatkan laporan kunjungan tamu secara lengkap dan terperinci.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Cara Kerja</h2>
+          <div className="max-w-3xl mx-auto space-y-8">
+            <div className="flex items-start gap-4">
+              <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">1</div>
+              <div>
+                <h3 className="text-xl font-semibold">Daftar Akun</h3>
+                <p className="text-muted-foreground">Buat akun untuk mulai menggunakan layanan kami.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">2</div>
+              <div>
+                <h3 className="text-xl font-semibold">Kelola Tamu</h3>
+                <p className="text-muted-foreground">Daftarkan tamu dan kelola data kunjungan dengan mudah.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1">3</div>
+              <div>
+                <h3 className="text-xl font-semibold">Pantau Aktivitas</h3>
+                <p className="text-muted-foreground">Pantau riwayat kunjungan tamu kapan saja dan di mana saja.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Pertanyaan yang Sering Diajukan</h2>
+          <div className="max-w-3xl mx-auto space-y-4">
+            <div className="bg-background p-6 rounded-lg shadow-sm border">
+              <h3 className="font-semibold text-lg">Apakah aplikasi ini gratis digunakan?</h3>
+              <p className="text-muted-foreground mt-2">Ya, aplikasi ini sepenuhnya gratis untuk digunakan tanpa biaya tersembunyi.</p>
+            </div>
+            <div className="bg-background p-6 rounded-lg shadow-sm border">
+              <h3 className="font-semibold text-lg">Bagaimana cara mengunduh laporan tamu?</h3>
+              <p className="text-muted-foreground mt-2">Anda dapat mengunduh laporan tamu dalam format Excel atau PDF melalui menu laporan di dashboard.</p>
+            </div>
+            <div className="bg-background p-6 rounded-lg shadow-sm border">
+              <h3 className="font-semibold text-lg">Apakah data saya aman?</h3>
+              <p className="text-muted-foreground mt-2">Kami mengutamakan keamanan data Anda dengan enkripsi tingkat tinggi dan perlindungan privasi yang ketat.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-6">Tentang Kami</h2>
+          <p className="text-muted-foreground max-w-3xl mx-auto mb-8">
+            Buku Tamu Digital dikembangkan untuk memudahkan pengelolaan tamu secara digital dengan antarmuka yang ramah pengguna dan fitur yang lengkap.
+            Tim kami berkomitmen untuk terus mengembangkan aplikasi ini agar semakin bermanfaat bagi pengguna.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/about">Pelajari Lebih Lanjut</Link>
+            </Button>
+            <Button size="lg" asChild>
+              <Link href="/contact">Hubungi Kami</Link>
             </Button>
           </div>
         </div>

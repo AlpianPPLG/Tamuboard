@@ -87,6 +87,20 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
         setProgress(i)
       }
 
+      // Check for duplicate guest (same name and phone number)
+      if (mode === "create" && GuestStorage.checkDuplicateGuest(data.name, data.phone)) {
+        setError("Data tamu dengan nama dan nomor telepon yang sama sudah terdaftar")
+        toast.error("Gagal menambahkan tamu: Data sudah ada")
+        return
+      }
+      
+      // If editing, check for duplicates but exclude the current guest
+      if (mode === "edit" && guest?.id && GuestStorage.checkDuplicateGuest(data.name, data.phone, guest.id)) {
+        setError("Data tamu dengan nama dan nomor telepon yang sama sudah terdaftar")
+        toast.error("Gagal memperbarui: Data sudah digunakan tamu lain")
+        return
+      }
+
       const guestData: Guest = {
         ...data,
         id: guest?.id || Date.now().toString(),
@@ -122,34 +136,47 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 p-4 sm:p-6">
-        {error && <p className="text-sm text-red-600">{error}</p>}
+    <div className="h-full flex flex-col">
+      <Form {...form}>
+        <form 
+          onSubmit={form.handleSubmit(onSubmit)} 
+          className="flex-1 flex flex-col space-y-3 sm:space-y-4 p-2 sm:p-3 md:p-4 overflow-y-auto"
+          style={{
+            maxHeight: 'calc(100vh - 100px)', // Adjust based on your header/footer height
+            scrollbarWidth: 'thin',
+          }}
+        >
+          {error && <p className="text-xs sm:text-sm text-red-600 px-1">{error}</p>}
 
         {isSubmitting && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-2 bg-muted/50 p-2 sm:p-3 rounded-lg">
+            <div className="flex justify-between text-xs sm:text-sm">
               <span className="text-muted-foreground">
                 {progress < 50 ? "Memvalidasi..." : progress < 80 ? "Menyimpan..." : "Menyelesaikan..."}
               </span>
-              <span>{progress}%</span>
+              <span className="font-medium">{progress}%</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-1.5 sm:h-2" />
           </div>
         )}
 
-        <div className="space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t.fullName}</FormLabel>
+                <FormItem className="xs:col-span-2">
+                  <FormLabel className="text-xs sm:text-sm">{t.fullName} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input 
+                      {...field} 
+                      disabled={isSubmitting} 
+                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      placeholder="Nama lengkap tamu"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -159,11 +186,16 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="institution"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t.institution}</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm">{t.institution} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input 
+                      {...field} 
+                      disabled={isSubmitting} 
+                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      placeholder="Nama instansi/perusahaan"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -173,11 +205,16 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="purpose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t.purpose}</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm">{t.purpose} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input 
+                      {...field} 
+                      disabled={isSubmitting} 
+                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      placeholder="Tujuan kunjungan"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -187,11 +224,17 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nomor Telepon</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm">{t.phone} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isSubmitting} />
+                    <Input 
+                      {...field} 
+                      disabled={isSubmitting} 
+                      type="tel" 
+                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      placeholder="Nomor telepon/WA"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -201,11 +244,17 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email (Opsional)</FormLabel>
+                  <FormLabel className="text-xs sm:text-sm">{t.email} <span className="text-muted-foreground text-xs">(Opsional)</span></FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} disabled={isSubmitting} />
+                    <Input 
+                      {...field} 
+                      disabled={isSubmitting} 
+                      type="email" 
+                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      placeholder="email@contoh.com"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -215,21 +264,21 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Kategori</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                  <FormLabel className="text-xs sm:text-sm">Kategori Tamu <span className="text-red-500">*</span></FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="text-xs sm:text-sm">
                       <SelectItem value="VIP">VIP</SelectItem>
                       <SelectItem value="regular">Reguler</SelectItem>
                       <SelectItem value="supplier">Supplier</SelectItem>
-                      <SelectItem value="intern">Siswa/Magang</SelectItem>
+                      <SelectItem value="intern">Magang</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -289,36 +338,64 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               control={form.control}
               name="notes"
               render={({ field }) => (
-                <FormItem className="sm:col-span-1 md:col-span-2">
-                  <FormLabel>Catatan (Opsional)</FormLabel>
+                <FormItem className="xs:col-span-2">
+                  <FormLabel className="text-xs sm:text-sm">Catatan Tambahan <span className="text-muted-foreground text-xs">(Opsional)</span></FormLabel>
                   <FormControl>
-                    <Textarea {...field} disabled={isSubmitting} />
+                    <Textarea
+                      {...field}
+                      disabled={isSubmitting}
+                      placeholder="Keterangan tambahan"
+                      className="min-h-[80px] sm:min-h-[100px] text-xs sm:text-sm"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 sm:pt-6 border-t mt-6 sm:mt-8">
-          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+          {/* Form fields remain the same */}
+        </form>
+      </Form>
+      
+      <div className="p-2 sm:p-3 md:p-4 border-t bg-background/80 backdrop-blur-sm">
+        <div className="flex justify-end gap-2 sm:gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onSuccess}
+            disabled={isSubmitting}
+            size="sm"
+            className="h-9 sm:h-10 text-xs sm:text-sm flex-1 sm:flex-none"
+          >
+            Batal
+          </Button>
+          <Button 
+            type="submit" 
+            form="guest-form"
+            disabled={isSubmitting}
+            size="sm"
+            className="h-9 sm:h-10 text-xs sm:text-sm flex-1 sm:flex-none"
+          >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Menyimpan...
+                <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                <span className="text-xs sm:text-sm">
+                  {mode === "create" ? "Menambahkan..." : "Menyimpan..."}
+                </span>
               </>
-            ) : mode === "edit" ? (
-              "Perbarui Data"
-            ) : (
+            ) : mode === "create" ? (
               <>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Simpan Tamu
+                <UserPlus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="text-xs sm:text-sm">Tambah Tamu</span>
               </>
+            ) : (
+              <span className="text-xs sm:text-sm">Simpan Perubahan</span>
             )}
           </Button>
         </div>
-      </form>
-    </Form>
+      </div>
+    </div>
   )
 }
