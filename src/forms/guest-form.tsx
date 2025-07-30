@@ -139,6 +139,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
     <div className="h-full flex flex-col">
       <Form {...form}>
         <form 
+          id="guest-form"
           onSubmit={form.handleSubmit(onSubmit)} 
           className="flex-1 flex flex-col space-y-2 xs:space-y-3 sm:space-y-4 p-2 xs:p-3 sm:p-4 overflow-y-auto"
           style={{
