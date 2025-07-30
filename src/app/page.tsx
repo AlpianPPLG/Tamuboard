@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Calendar, Clock, ShieldCheck, ArrowRight, UserPlus, BarChart3 } from "lucide-react";
 import Link from "next/link";
+import { Navbar } from "@/components/Navbar";
+import { FAQ } from "@/components/FAQComponent/faq";
 
 export default function LandingPage() {
   const features = [
@@ -31,8 +33,10 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Navbar />
+      
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-24 text-center">
+      <section className="container mx-auto px-6 pt-32 pb-24 text-center">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-8 leading-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             Selamat Datang di Buku Tamu Digital
@@ -80,6 +84,17 @@ export default function LandingPage() {
             </Card>
           ))}
         </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="container mx-auto px-4 py-20 scroll-mt-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">Pertanyaan yang Sering Diajukan</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Temukan jawaban atas pertanyaan umum seputar layanan Buku Tamu Digital kami
+          </p>
+        </div>
+        <FAQ />
       </section>
 
       {/* CTA Section */}
