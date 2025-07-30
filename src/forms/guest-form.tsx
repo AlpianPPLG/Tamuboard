@@ -140,7 +140,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       <Form {...form}>
         <form 
           onSubmit={form.handleSubmit(onSubmit)} 
-          className="flex-1 flex flex-col space-y-3 sm:space-y-4 p-2 sm:p-3 md:p-4 overflow-y-auto"
+          className="flex-1 flex flex-col space-y-2 xs:space-y-3 sm:space-y-4 p-2 xs:p-3 sm:p-4 overflow-y-auto"
           style={{
             maxHeight: 'calc(100vh - 100px)', // Adjust based on your header/footer height
             scrollbarWidth: 'thin',
@@ -160,23 +160,23 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
           </div>
         )}
 
-        <div className="space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4">
+        <div className="space-y-2 xs:space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem className="xs:col-span-2">
-                  <FormLabel className="text-xs sm:text-sm">{t.fullName} <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">{t.fullName} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       disabled={isSubmitting} 
-                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      className="text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
                       placeholder="Nama lengkap tamu"
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -186,16 +186,16 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="institution"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs sm:text-sm">{t.institution} <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">{t.institution} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       disabled={isSubmitting} 
-                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      className="text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
                       placeholder="Nama instansi/perusahaan"
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -205,16 +205,16 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="purpose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs sm:text-sm">{t.purpose} <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">{t.purpose} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       disabled={isSubmitting} 
-                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      className="text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
                       placeholder="Tujuan kunjungan"
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -224,17 +224,18 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs sm:text-sm">{t.phone} <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">{t.phone} <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       disabled={isSubmitting} 
                       type="tel" 
-                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      className="text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
                       placeholder="Nomor telepon/WA"
+                      inputMode="tel"
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -244,17 +245,18 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs sm:text-sm">{t.email} <span className="text-muted-foreground text-xs">(Opsional)</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">{t.email} <span className="text-muted-foreground text-[10px] xs:text-xs">(Opsional)</span></FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       disabled={isSubmitting} 
                       type="email" 
-                      className="text-xs sm:text-sm h-9 sm:h-10"
+                      className="text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
                       placeholder="email@contoh.com"
+                      inputMode="email"
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -264,11 +266,11 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs sm:text-sm">Kategori Tamu <span className="text-red-500">*</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">Kategori Tamu <span className="text-red-500">*</span></FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
-                        <SelectValue placeholder="Pilih kategori" />
+                      <SelectTrigger className="text-xs sm:text-sm h-8 xs:h-9 sm:h-10">
+                        <SelectValue placeholder="Pilih kategori" className="text-[11px] xs:text-xs sm:text-sm" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="text-xs sm:text-sm">
@@ -288,14 +290,14 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="scheduledDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Tanggal Dijadwalkan (Opsional)</FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">Tanggal Dijadwalkan <span className="text-muted-foreground text-[10px] xs:text-xs">(Opsional)</span></FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant="outline"
                           className={cn(
-                            "pl-3 text-left font-normal h-10 sm:h-9",
+                            "pl-3 text-left font-normal h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm",
                             !field.value && "text-muted-foreground",
                           )}
                           disabled={isSubmitting}
@@ -325,11 +327,16 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="scheduledTime"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Waktu Dijadwalkan (Opsional)</FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">Waktu Dijadwalkan <span className="text-muted-foreground text-[10px] xs:text-xs">(Opsional)</span></FormLabel>
                   <FormControl>
-                    <Input type="time" {...field} disabled={isSubmitting} />
+                    <Input 
+                      type="time" 
+                      {...field} 
+                      disabled={isSubmitting} 
+                      className="h-8 xs:h-9 sm:h-10 text-xs sm:text-sm"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -339,16 +346,16 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
               name="notes"
               render={({ field }) => (
                 <FormItem className="xs:col-span-2">
-                  <FormLabel className="text-xs sm:text-sm">Catatan Tambahan <span className="text-muted-foreground text-xs">(Opsional)</span></FormLabel>
+                  <FormLabel className="text-[11px] xs:text-xs sm:text-sm">Catatan Tambahan <span className="text-muted-foreground text-[10px] xs:text-xs">(Opsional)</span></FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
                       disabled={isSubmitting}
                       placeholder="Keterangan tambahan"
-                      className="min-h-[80px] sm:min-h-[100px] text-xs sm:text-sm"
+                      className="min-h-[60px] xs:min-h-[80px] sm:min-h-[100px] text-xs sm:text-sm"
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="text-[10px] xs:text-xs" />
                 </FormItem>
               )}
             />
@@ -359,15 +366,15 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
         </form>
       </Form>
       
-      <div className="p-2 sm:p-3 md:p-4 border-t bg-background/80 backdrop-blur-sm">
-        <div className="flex justify-end gap-2 sm:gap-3">
+      <div className="p-2 xs:p-3 sm:p-4 border-t bg-background/80 backdrop-blur-sm">
+        <div className="flex justify-end gap-2 xs:gap-3">
           <Button
             type="button"
             variant="outline"
             onClick={onSuccess}
             disabled={isSubmitting}
             size="sm"
-            className="h-9 sm:h-10 text-xs sm:text-sm flex-1 sm:flex-none"
+            className="h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm flex-1 xs:flex-none"
           >
             Batal
           </Button>
@@ -376,7 +383,7 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
             form="guest-form"
             disabled={isSubmitting}
             size="sm"
-            className="h-9 sm:h-10 text-xs sm:text-sm flex-1 sm:flex-none"
+            className="h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm flex-1 xs:flex-none"
           >
             {isSubmitting ? (
               <>
