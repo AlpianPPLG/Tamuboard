@@ -11,8 +11,12 @@ type StoredGuest = Omit<Guest, 'visitDate'> & { visitDate: string };
 
 // Kelas untuk mengelola data tamu  
 export class GuestStorage {
+  static onGuestsChange(arg0: (updatedGuests: any) => void) {
+    throw new Error('Method not implemented.');
+  }
   private static readonly TRASH_KEY = `${STORAGE_KEY}-trash`;
   private static readonly TAGS_KEY = `${STORAGE_KEY}-tags`;
+    static clearLocalStorage: any;
 
   // Check if a guest with the same name and phone already exists
   static checkDuplicateGuest(name: string, phone: string, excludeId?: string): boolean {

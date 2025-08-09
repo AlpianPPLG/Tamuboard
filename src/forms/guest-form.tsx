@@ -13,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { GuestStorage } from "@/lib/guest-stotrage"
-import type { Guest, GuestFormData } from "@/types/guest"
+import type { Guest } from "@/types/guest"
 import { useLanguage } from "@/contexts/language-context"
 import { toast } from "sonner"
 import { Loader2, UserPlus, XCircle, CalendarIcon } from "lucide-react"
@@ -33,6 +33,8 @@ const guestSchema = z.object({
   scheduledTime: z.string().optional(),
   notes: z.string().optional(),
 })
+
+type GuestFormData = z.infer<typeof guestSchema>
 
 interface GuestFormProps {
   guest?: Guest
@@ -56,15 +58,15 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
   const form = useForm<GuestFormData>({
     resolver: zodResolver(guestSchema),
     defaultValues: {
-      name: guest?.name ?? "",
-      institution: guest?.institution ?? "",
-      purpose: guest?.purpose ?? "",
-      phone: guest?.phone ?? "",
-      email: guest?.email ?? "",
-      category: guest?.category ?? "regular",
+      name: guest?.name || "",
+      institution: guest?.institution || "",
+      purpose: guest?.purpose || "",
+      phone: guest?.phone || "",
+      email: guest?.email || "",
+      category: guest?.category || "regular",
       scheduledDate: guest?.scheduledDate ? new Date(guest.scheduledDate) : undefined,
-      scheduledTime: guest?.scheduledTime ?? "",
-      notes: guest?.notes ?? "",
+      scheduledTime: guest?.scheduledTime || "",
+      notes: guest?.notes || "",
     },
   })
 
@@ -88,14 +90,14 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       }
 
       // Check for duplicate guest (same name and phone number)
-      if (mode === "create" && GuestStorage.checkDuplicateGuest(data.name, data.phone)) {
+      if (mode === "create" && await GuestStorage.checkDuplicateGuest(data.name, data.phone)) {
         setError("Data tamu dengan nama dan nomor telepon yang sama sudah terdaftar")
         toast.error("Gagal menambahkan tamu: Data sudah ada")
         return
       }
       
       // If editing, check for duplicates but exclude the current guest
-      if (mode === "edit" && guest?.id && GuestStorage.checkDuplicateGuest(data.name, data.phone, guest.id)) {
+      if (mode === "edit" && guest?.id && await GuestStorage.checkDuplicateGuest(data.name, data.phone, guest.id)) {
         setError("Data tamu dengan nama dan nomor telepon yang sama sudah terdaftar")
         toast.error("Gagal memperbarui: Data sudah digunakan tamu lain")
         return
@@ -117,10 +119,10 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       }
 
       if (mode === "create") {
-        GuestStorage.addGuest(guestData)
+        await GuestStorage.addGuest(guestData)
         toast.success("Tamu berhasil ditambahkan")
       } else {
-        GuestStorage.updateGuest(guestData.id, guestData)
+        await GuestStorage.updateGuest(guestData.id, guestData)
         toast.success("Data tamu berhasil diperbarui")
       }
 

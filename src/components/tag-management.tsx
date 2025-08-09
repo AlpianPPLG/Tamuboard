@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Guest, GuestStorage } from '@/lib/guest-stotrage';
+import { Guest } from '@/types/guest';
+import { GuestStorage } from '@/lib/guest-stotrage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +17,16 @@ export function TagManagement({ guest, onUpdate }: { guest: Guest; onUpdate: () 
 
   useEffect(() => {
     // Load all available tags
-    setAllTags(GuestStorage.getAllTags());
+    const loadTags = async () => {
+      try {
+        const tags = await GuestStorage.getAllTags();
+        setAllTags(tags);
+      } catch (error) {
+        console.error('Error loading tags:', error);
+      }
+    };
+    
+    loadTags();
     
     // Load current guest's tags
     if (guest?.tags) {
@@ -24,35 +34,45 @@ export function TagManagement({ guest, onUpdate }: { guest: Guest; onUpdate: () 
     }
   }, [guest]);
 
-  const handleAddTag = () => {
+  const handleAddTag = async () => {
     if (!newTag.trim()) return;
     
     const tag = newTag.trim();
     
-    // Add tag to guest
-    const success = GuestStorage.addTagToGuest(guest.id, tag);
-    
-    if (success) {
-      setTags(prev => [...prev, tag]);
-      setAllTags(prev => Array.from(new Set([...prev, tag])));
-      setNewTag('');
-      onUpdate();
-      toast.success(`Tag "${tag}" ditambahkan`);
-    } else {
+    try {
+      // Add tag to guest
+      const success = await GuestStorage.addTagToGuest(guest.id, tag);
+      
+      if (success) {
+        setTags(prev => [...prev, tag]);
+        setAllTags(prev => Array.from(new Set([...prev, tag])));
+        setNewTag('');
+        onUpdate();
+        toast.success(`Tag "${tag}" ditambahkan`);
+      } else {
+        toast.error('Gagal menambahkan tag');
+      }
+    } catch (error) {
+      console.error('Error adding tag:', error);
       toast.error('Gagal menambahkan tag');
     }
     
     setIsAdding(false);
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    const success = GuestStorage.removeTagFromGuest(guest.id, tagToRemove);
-    
-    if (success) {
-      setTags(prev => prev.filter(tag => tag !== tagToRemove));
-      onUpdate();
-      toast.success(`Tag "${tagToRemove}" dihapus`);
-    } else {
+  const handleRemoveTag = async (tagToRemove: string) => {
+    try {
+      const success = await GuestStorage.removeTagFromGuest(guest.id, tagToRemove);
+      
+      if (success) {
+        setTags(prev => prev.filter(tag => tag !== tagToRemove));
+        onUpdate();
+        toast.success(`Tag "${tagToRemove}" dihapus`);
+      } else {
+        toast.error('Gagal menghapus tag');
+      }
+    } catch (error) {
+      console.error('Error removing tag:', error);
       toast.error('Gagal menghapus tag');
     }
   };

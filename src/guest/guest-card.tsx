@@ -72,19 +72,31 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
   const { language, t } = useLanguage();
 
   const handleCheckOut = () => {
-    const updatedGuest = GuestStorage.checkOutGuest(guest.id);
-    if (updatedGuest) {
-      toast.success(`${guest.name} ${t.successCheckOut}`, {
-        description: `Check out pada ${updatedGuest.checkOutTime}`,
-        icon: <CheckCircle className="h-4 w-4" />,
-      });
-      onUpdate();
-    } else {
-      toast.error("Gagal melakukan check out", {
-        description: "Terjadi kesalahan saat memproses check out",
-        icon: <XCircle className="h-4 w-4" />,
-      });
-    }
+    const checkOut = async () => {
+      try {
+        const updatedGuest = await GuestStorage.checkOutGuest(guest.id);
+        if (updatedGuest) {
+          toast.success(`${guest.name} ${t.successCheckOut}`, {
+            description: `Check out pada ${updatedGuest.checkOutTime}`,
+            icon: <CheckCircle className="h-4 w-4" />,
+          });
+          onUpdate();
+        } else {
+          toast.error("Gagal melakukan check out", {
+            description: "Terjadi kesalahan saat memproses check out",
+            icon: <XCircle className="h-4 w-4" />,
+          });
+        }
+      } catch (error) {
+        console.error('Error during checkout:', error);
+        toast.error("Gagal melakukan check out", {
+          description: "Terjadi kesalahan saat memproses check out",
+          icon: <XCircle className="h-4 w-4" />,
+        });
+      }
+    };
+    
+    checkOut();
   };
 
   const handleEditSuccess = () => {
@@ -93,17 +105,28 @@ export function GuestCard({ guest, onUpdate }: GuestCardProps) {
   };
 
   const handleDelete = () => {
-    const success = GuestStorage.deleteGuest(guest.id);
-    if (success) {
-      toast.success(`Data tamu ${t.successDelete}`, {
-        icon: <CheckCircle className="h-4 w-4" />,
-      });
-      onUpdate();
-    } else {
-      toast.error('Gagal menghapus data tamu', {
-        icon: <XCircle className="h-4 w-4" />,
-      });
-    }
+    const deleteGuest = async () => {
+      try {
+        const success = await GuestStorage.deleteGuest(guest.id);
+        if (success) {
+          toast.success(`Data tamu ${t.successDelete}`, {
+            icon: <CheckCircle className="h-4 w-4" />,
+          });
+          onUpdate();
+        } else {
+          toast.error('Gagal menghapus data tamu', {
+            icon: <XCircle className="h-4 w-4" />,
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting guest:', error);
+        toast.error('Gagal menghapus data tamu', {
+          icon: <XCircle className="h-4 w-4" />,
+        });
+      }
+    };
+    
+    deleteGuest();
     setShowDeleteDialog(false);
   };
 

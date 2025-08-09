@@ -77,6 +77,8 @@ export interface ReminderSettings {
 }
 
 export interface GuestFormData {
+  feedback: string;
+  rating: number;
   name: string;
   institution: string;
   purpose: string;

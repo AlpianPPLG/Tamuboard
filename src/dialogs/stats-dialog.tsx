@@ -41,16 +41,24 @@ export function StatsDialog({ children }: StatsDialogProps) {
 
   useEffect(() => {
     if (open) {
-      const raw = GuestStorage.getStats();
-      setStats({
-        totalToday: raw.totalToday,
-        totalThisMonth: raw.totalThisMonth,
-        totalThisYear: raw.totalThisYear,
-        currentlyCheckedIn: raw.currentlyCheckedIn,
-        vipGuests: raw.vipGuests ?? 0,
-        scheduledToday: raw.scheduledToday ?? 0,
-        deletedCount: raw.deletedCount ?? 0, // <-- tambahkan ini
-      });
+      const loadStats = async () => {
+        try {
+          const raw = await GuestStorage.getStats();
+          setStats({
+            totalToday: raw.totalToday,
+            totalThisMonth: raw.totalThisMonth,
+            totalThisYear: raw.totalThisYear,
+            currentlyCheckedIn: raw.currentlyCheckedIn,
+            vipGuests: raw.vipGuests ?? 0,
+            scheduledToday: raw.scheduledToday ?? 0,
+            deletedCount: raw.deletedCount ?? 0,
+          });
+        } catch (error) {
+          console.error('Error loading stats:', error);
+        }
+      };
+      
+      loadStats();
     }
   }, [open]);
   
