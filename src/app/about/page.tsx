@@ -18,7 +18,7 @@ export default function AboutPage() {
         instagram: "https://instagram.com/_ubermensch7",
         linkedin: "https://www.linkedin.com/in/alpian-%E3%85%A4-7a16522bb/",
         github: "https://github.com/AlpianPPLG",
-        whatsapp: "https://wa.me/6282354877197",
+        whatsapp: "https://wa.me/628125844194",
         facebook: "https://www.facebook.com/Nova%20Pratama.id",
         thread: "https://www.threads.com/@_ubermensch7?xmt=AQF0M12vkH6fP0N0UmW59X0y2oEbeBUvcwGTCbQHZBNJtpA",
       },
