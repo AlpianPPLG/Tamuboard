@@ -88,14 +88,14 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       }
 
       // Check for duplicate guest (same name and phone number)
-      if (mode === "create" && GuestStorage.checkDuplicateGuest(data.name, data.phone)) {
+      if (mode === "create" && await GuestStorage.checkDuplicateGuest(data.name, data.phone)) {
         setError("Data tamu dengan nama dan nomor telepon yang sama sudah terdaftar")
         toast.error("Gagal menambahkan tamu: Data sudah ada")
         return
       }
       
       // If editing, check for duplicates but exclude the current guest
-      if (mode === "edit" && guest?.id && GuestStorage.checkDuplicateGuest(data.name, data.phone, guest.id)) {
+      if (mode === "edit" && guest?.id && await GuestStorage.checkDuplicateGuest(data.name, data.phone, guest.id)) {
         setError("Data tamu dengan nama dan nomor telepon yang sama sudah terdaftar")
         toast.error("Gagal memperbarui: Data sudah digunakan tamu lain")
         return
@@ -117,10 +117,10 @@ export function GuestForm({ guest, mode = "create", onSuccess }: GuestFormProps)
       }
 
       if (mode === "create") {
-        GuestStorage.addGuest(guestData)
+        await GuestStorage.addGuest(guestData)
         toast.success("Tamu berhasil ditambahkan")
       } else {
-        GuestStorage.updateGuest(guestData.id, guestData)
+        await GuestStorage.updateGuest(guestData.id, guestData)
         toast.success("Data tamu berhasil diperbarui")
       }
 

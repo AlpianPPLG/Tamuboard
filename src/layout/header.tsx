@@ -88,16 +88,16 @@ export function Header({
   }, []);
 
   useEffect(() => {
-    const guests = GuestStorage.getGuests();
-    const allTags = new Set<string>();
-    
-    guests.forEach(guest => {
-      if (guest.tags) {
-        guest.tags.forEach(tag => allTags.add(tag));
+    const loadTags = async () => {
+      try {
+        const tags = await GuestStorage.getAllTags();
+        setAvailableTags(tags);
+      } catch (error) {
+        console.error('Error loading tags:', error);
       }
-    });
+    };
     
-    setAvailableTags(Array.from(allTags));
+    loadTags();
   }, []);
 
   const handleGuestAdded = () => {

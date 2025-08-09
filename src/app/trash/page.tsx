@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Guest } from '@/types/guest';
 import { GuestStorage } from '@/lib/guest-stotrage';
-import TrashManager from '@/lib/trash-manager';
 import { Button } from '@/components/ui/button';
 import { Trash2, Undo2, Search, X, ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -20,91 +19,87 @@ export default function TrashPage() {
   const [selectedGuests, setSelectedGuests] = useState<Set<string>>(new Set());
   const { t } = useLanguage();
 
-  const loadDeletedGuests = () => {
-    const guests = TrashManager.getTrash();
-    setDeletedGuests(guests);
-  };
+  const loadDeletedGuests = useCallback(async () => {
+    try {
+      const guests = await GuestStorage.getTrash();
+      setDeletedGuests(guests);
+    } catch (error) {
+      console.error('Error loading deleted guests:', error);
+      toast.error('Gagal memuat data sampah');
+    }
+  }, []);
 
   useEffect(() => {
     loadDeletedGuests();
-    
-    const unsubscribe = TrashManager.onChange(loadDeletedGuests);
-    
-    const cleanup = async () => {
-      const guests = GuestStorage.getGuests(true);
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const remainingGuests = guests.filter(guest => 
-        guest.status !== 'deleted' || 
-        !guest.deletedAt || 
-        guest.deletedAt >= thirtyDaysAgo
-      );
-      
-      if (remainingGuests.length < guests.length) {
-        GuestStorage.saveGuests(remainingGuests);
-        loadDeletedGuests();
-      }
-    };
-    
-    cleanup();
-    
-    return () => {
-      unsubscribe();
-    };
-  }, []);
+  }, [loadDeletedGuests]);
 
-  const handleRestore = (id: string) => {
-    const success = TrashManager.restoreFromTrash(id);
-    if (success) {
-      toast.success(t.restoreSuccess);
-    } else {
+  const handleRestore = async (id: string) => {
+    try {
+      const success = await GuestStorage.restoreFromTrash(id);
+      if (success) {
+        toast.success(t.restoreSuccess);
+        loadDeletedGuests();
+      } else {
+        toast.error(t.restoreError);
+      }
+    } catch (error) {
+      console.error('Error restoring guest:', error);
       toast.error(t.restoreError);
     }
   };
 
-  const handlePermanentDelete = (id: string) => {
-    const guests = GuestStorage.getGuests(true);
-    const updatedGuests = guests.filter(guest => guest.id !== id);
-    GuestStorage.saveGuests(updatedGuests);
-    toast.success(t.deleteSuccess);
-    loadDeletedGuests();
+  const handlePermanentDelete = async (id: string) => {
+    try {
+      const success = await GuestStorage.permanentDelete(id);
+      if (success) {
+        toast.success(t.deleteSuccess);
+        loadDeletedGuests();
+      } else {
+        toast.error(t.deleteError);
+      }
+    } catch (error) {
+      console.error('Error permanently deleting guest:', error);
+      toast.error(t.deleteError);
+    }
   };
 
-  const handleBulkAction = (action: 'restore' | 'delete') => {
+  const handleBulkAction = async (action: 'restore' | 'delete') => {
     const ids = Array.from(selectedGuests);
-    let success = true;
+    let successCount = 0;
     
     for (const id of ids) {
       try {
         if (action === 'restore') {
-          if (!TrashManager.restoreFromTrash(id)) {
-            success = false;
+          const success = await GuestStorage.restoreFromTrash(id);
+          if (success) {
+            successCount++;
           }
         } else {
-          const guests = GuestStorage.getGuests(true);
-          const updatedGuests = guests.filter(guest => guest.id !== id);
-          GuestStorage.saveGuests(updatedGuests);
+          const success = await GuestStorage.permanentDelete(id);
+          if (success) {
+            successCount++;
+          }
         }
       } catch (error) {
         console.error(`Error during ${action}:`, error);
-        success = false;
       }
     }
 
-    if (success) {
+    if (successCount > 0) {
       const message = action === 'restore' 
-        ? `${ids.length} ${t.restoreSuccess.toLowerCase()}`
-        : `${ids.length} ${t.deleteSuccess.toLowerCase()}`;
+        ? `${successCount} ${t.restoreSuccess.toLowerCase()}`
+        : `${successCount} ${t.deleteSuccess.toLowerCase()}`;
       
       toast.success(message);
       setSelectedGuests(new Set());
       loadDeletedGuests();
-    } else {
+    }
+    
+    if (successCount < ids.length) {
       const errorMessage = action === 'restore' 
         ? t.restoreError
         : t.deleteError;
-      toast.error(errorMessage);
+      toast.error(`${errorMessage} (${successCount}/${ids.length} berhasil)`);
     }
   };
   

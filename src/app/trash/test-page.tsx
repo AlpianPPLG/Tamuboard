@@ -64,14 +64,22 @@ export default function TrashTestPage() {
     loadTestData();
   };
 
-  const moveToTrash = (id: string) => {
-    TrashManager.moveToTrash(id, 'test-user');
-    loadTestData();
+  const moveToTrash = async (id: string) => {
+    try {
+      await TrashManager.moveToTrash(id, 'test-user');
+      loadTestData();
+    } catch (error) {
+      console.error('Error moving to trash:', error);
+    }
   };
 
-  const restoreFromTrash = (id: string) => {
-    TrashManager.restoreFromTrash(id);
-    loadTestData();
+  const restoreFromTrash = async (id: string) => {
+    try {
+      await TrashManager.restoreFromTrash(id);
+      loadTestData();
+    } catch (error) {
+      console.error('Error restoring from trash:', error);
+    }
   };
 
   const deletePermanently = (id: string) => {
@@ -81,17 +89,29 @@ export default function TrashTestPage() {
   };
 
   const resetTestData = () => {
-    const guests = GuestStorage.getGuests(true);
-    const filteredGuests = guests.filter(g => !g.name.startsWith("Test Guest"));
-    GuestStorage.saveGuests(filteredGuests);
-    loadTestData();
+  const deletePermanently = async (id: string) => {
+    try {
+      await GuestStorage.permanentDelete(id);
+      loadTestData();
+    } catch (error) {
+      console.error('Error deleting permanently:', error);
+    }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
+  const resetTestData = async () => {
+    try {
+      const guests = await GuestStorage.getGuests(true);
+      const testGuests = guests.filter(g => g.name.startsWith("Test Guest"));
+      
+      // Delete all test guests permanently
+      for (const guest of testGuests) {
+        await GuestStorage.permanentDelete(guest.id);
+      }
+      
+      loadTestData();
+    } catch (error) {
+      console.error('Error resetting test data:', error);
+    }
     <div className="container mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-4">Trash Feature Test</h1>

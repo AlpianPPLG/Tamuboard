@@ -53,8 +53,9 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
       if (open && initialGuest?.id) {
         try {
           setIsLoading(true);
-          const guests = GuestStorage.getGuests();
-          const freshGuest = guests.find(g => g.id === initialGuest.id) || null;
+          const freshGuest = await GuestStorage.getGuests().then(guests => 
+            guests.find(g => g.id === initialGuest.id) || null
+          );
           setCurrentGuest(freshGuest);
         } catch (error) {
           console.error('Error fetching guest data:', error);
@@ -73,9 +74,13 @@ export function GuestDetailDialog({ guest: initialGuest, open, onOpenChange, onU
     onUpdate?.();
     
     if (initialGuest?.id) {
-      const guests = GuestStorage.getGuests();
-      const updatedGuest = guests.find(g => g.id === initialGuest.id) || null;
-      setCurrentGuest(updatedGuest);
+      try {
+        const guests = await GuestStorage.getGuests();
+        const updatedGuest = guests.find(g => g.id === initialGuest.id) || null;
+        setCurrentGuest(updatedGuest);
+      } catch (error) {
+        console.error('Error fetching updated guest:', error);
+      }
     }
   };
 

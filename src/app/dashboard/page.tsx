@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from '@/layout/header';
 import { GuestList } from '@/guest/guest-list';
 import { GuestStorage } from '@/lib/guest-stotrage';
-import { filterGuests } from '@/lib/guest-utils';
+import { FirestoreService } from '@/lib/firestore-service';
 import { Guest, FilterOptions } from '@/types/guest';
 import { LanguageProvider } from '@/contexts/language-context';
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcut';
 import { toast } from 'sonner';
+import { MigrationNotice } from '@/components/migration-notice';
 
 function HomePage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -26,22 +27,39 @@ function HomePage() {
   });
 
   // Load guests from storage
-  const loadGuests = () => {
-    const loadedGuests = GuestStorage.getGuests();
-    setGuests(loadedGuests);
-  };
+  const loadGuests = useCallback(async () => {
+    try {
+      const loadedGuests = await GuestStorage.getGuests();
+      setGuests(loadedGuests);
+    } catch (error) {
+      console.error('Error loading guests:', error);
+      toast.error('Gagal memuat data tamu');
+    }
+  }, []);
 
   // Apply filters and search
   useEffect(() => {
     const currentFilters = { ...filters, search: searchValue };
-    const filtered = filterGuests(guests, currentFilters);
+    const filtered = FirestoreService.filterGuests(guests, currentFilters);
     setFilteredGuests(filtered);
   }, [guests, searchValue, filters]);
 
-  // Load guests on mount
+  // Load guests on mount and set up real-time listener
   useEffect(() => {
     loadGuests();
-  }, []);
+    
+    // Set up real-time listener
+    const unsubscribe = GuestStorage.onGuestsChange((updatedGuests) => {
+      setGuests(updatedGuests);
+    });
+    
+    // Clear localStorage on first load
+    GuestStorage.clearLocalStorage();
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [loadGuests]);
 
   // Set up keyboard shortcuts
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -94,6 +112,7 @@ function HomePage() {
       />
       
       <main className="flex-1 w-full px-2 sm:px-4 py-3 sm:py-6 overflow-hidden mb-4">
+        <MigrationNotice />
         <div className="space-y-3 sm:space-y-6 h-full">
           {/* Summary */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4">
