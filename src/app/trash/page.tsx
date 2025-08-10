@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Guest } from '@/types/guest';
-import { GuestStorage } from '@/lib/guest-stotrage';
 import { Button } from '@/components/ui/button';
 import { Trash2, Undo2, Search, X, ArrowLeft, Clock, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -12,6 +10,8 @@ import { id } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/language-context';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { GuestStorage } from '@/lib/guest-storage';
+import { Guest } from '@/types/guest';
 
 export default function TrashPage() {
   const [deletedGuests, setDeletedGuests] = useState<Guest[]>([]);

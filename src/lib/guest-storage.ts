@@ -1,6 +1,5 @@
 "use client"
-
-import { FirestoreService } from './firestore-service';
+import { FirestoreService } from '@/lib/firestore-service';
 import { Guest, GuestStats } from '@/types/guest';
 
 // Migration wrapper class that delegates to FirestoreService

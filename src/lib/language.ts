@@ -48,6 +48,39 @@ export interface Translations {
   // Actions
   edit: string;
   delete: string;
+  restore: string;
+  back: string;
+  
+  // Trash
+  trash: {
+    title: string;
+    empty: string;
+    emptyDescription: string;
+    deleted: string;
+    restore: string;
+    restoreSuccess: string;
+    restoreError: string;
+    restoreSelected: string;
+    deletePermanently: string;
+    deleteSuccess: string;
+    deleteError: string;
+    deleteSelected: string;
+    bulkRestoreSuccess: string;
+    bulkRestoreError: string;
+    bulkDeleteSuccess: string;
+    bulkDeleteError: string;
+    confirmDelete: string;
+    confirmBulkDelete: string;
+    noResults: string;
+    loadError: string;
+  
+    deleteConfirmation: string;
+    restoreConfirmation: string;
+    expiresToday: string;
+    expiresInOneDay: string;
+    expiresInDays: string;
+    deletedOn: string;
+  };
   viewDetail: string;
   checkOut: string;
   
@@ -68,6 +101,7 @@ export interface Translations {
   successCheckIn: string;
   successCheckOut: string;
   successUpdate: string;
+  successCreate: string;
   successDelete: string;
   restoreSuccess: string;
   restoreError: string;
@@ -78,23 +112,25 @@ export interface Translations {
   bulkDeleteSuccess: string;
   bulkDeleteError: string;
   
+  // Toast Messages
+  toast: {
+    success: string;
+    error: string;
+    createSuccess: string;
+    updateSuccess: string;
+    deleteSuccess: string;
+    restoreSuccess: string;
+    undo: string;
+    actionUndone: string;
+  };
+  
   // Footer
   madeWith: string;
   allRightsReserved: string;
-  
-  // Trash
-  trash: {
-    title: string;
-    empty: string;
-    restore: string;
-    deletePermanent: string;
-    deleteConfirmation: string;
-    restoreConfirmation: string;
-    expiresToday: string;
-    expiresInOneDay: string;
-    expiresInDays: string;
-    deletedOn: string;
-  };
+  expiresToday: string;
+  expiresInOneDay: string;
+  expiresInDays: string;
+  deletedOn: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -156,6 +192,7 @@ export const translations: Record<Language, Translations> = {
     successCheckIn: 'berhasil check in!',
     successCheckOut: 'telah check out',
     successUpdate: 'berhasil diperbarui!',
+    successCreate: 'berhasil dibuat!',
     successDelete: 'berhasil dihapus',
     restoreSuccess: 'Tamu berhasil dikembalikan',
     restoreError: 'Gagal mengembalikan tamu',
@@ -166,29 +203,63 @@ export const translations: Record<Language, Translations> = {
     bulkDeleteSuccess: '{count} tamu berhasil dihapus permanen',
     bulkDeleteError: 'Gagal menghapus beberapa tamu',
 
+    // Toast Messages
+    toast: {
+      success: 'Berhasil!',
+      error: 'Terjadi kesalahan',
+      createSuccess: 'Data berhasil ditambahkan',
+      updateSuccess: 'Data berhasil diperbarui',
+      deleteSuccess: 'Data berhasil dihapus',
+      restoreSuccess: 'Data berhasil dikembalikan',
+      undo: 'Batalkan',
+      actionUndone: 'Aksi dibatalkan'
+    },
+
     // Footer
     madeWith: 'Made with',
     allRightsReserved: 'All rights reserved',
-    
+
     // Trash
     trash: {
       title: 'Tempat Sampah',
       empty: 'Tidak ada data di tempat sampah',
       restore: 'Kembalikan',
-      deletePermanent: 'Hapus Permanen',
+      deletePermanently: 'Hapus Permanen',
       deleteConfirmation: 'Apakah Anda yakin ingin menghapus permanen tamu ini? Tindakan ini tidak dapat dibatalkan.',
       restoreConfirmation: 'Apakah Anda yakin ingin mengembalikan tamu ini?',
       expiresToday: 'Kedaluwarsa hari ini',
       expiresInOneDay: '1 hari lagi',
       expiresInDays: '{days} hari lagi',
       deletedOn: 'Dihapus pada',
+      emptyDescription: "",
+      deleted: "",
+      restoreSuccess: "",
+      restoreError: "",
+      restoreSelected: "",
+      deleteSuccess: "",
+      deleteError: "",
+      deleteSelected: "",
+      bulkRestoreSuccess: "",
+      bulkRestoreError: "",
+      bulkDeleteSuccess: "",
+      bulkDeleteError: "",
+      confirmDelete: "",
+      confirmBulkDelete: "",
+      noResults: "",
+      loadError: ""
     },
     all: undefined,
     date: undefined,
     name: undefined,
     newest: undefined,
     oldest: undefined,
-    status: undefined
+    status: undefined,
+    restore: "",
+    back: "",
+    expiresToday: "",
+    expiresInOneDay: "",
+    expiresInDays: "",
+    deletedOn: ""
   },
   en: {
     // Header
@@ -248,6 +319,7 @@ export const translations: Record<Language, Translations> = {
     successCheckIn: 'Successfully checked in!',
     successCheckOut: 'has checked out',
     successUpdate: 'successfully updated!',
+    successCreate: 'successfully created!',
     successDelete: 'successfully deleted',
     restoreSuccess: 'Guest restored successfully',
     restoreError: 'Failed to restore guest',
@@ -258,29 +330,63 @@ export const translations: Record<Language, Translations> = {
     bulkDeleteSuccess: 'Permanently deleted {count} guests',
     bulkDeleteError: 'Failed to delete some guests',
 
+    // Toast Messages
+    toast: {
+      success: 'Success!',
+      error: 'An error occurred',
+      createSuccess: 'Data created successfully',
+      updateSuccess: 'Data updated successfully',
+      deleteSuccess: 'Data deleted successfully',
+      restoreSuccess: 'Data restored successfully',
+      undo: 'Undo',
+      actionUndone: 'Action undone'
+    },
+
     // Footer
     madeWith: 'Made with',
     allRightsReserved: 'All rights reserved',
-    
+
     // Trash
     trash: {
       title: 'Trash',
       empty: 'Trash is empty',
       restore: 'Restore',
-      deletePermanent: 'Delete Permanently',
+      deletePermanently: 'Delete Permanently',
       deleteConfirmation: 'Are you sure you want to permanently delete this guest? This action cannot be undone.',
       restoreConfirmation: 'Are you sure you want to restore this guest?',
       expiresToday: 'Expires today',
       expiresInOneDay: '1 day remaining',
       expiresInDays: '{days} days remaining',
       deletedOn: 'Deleted on',
+      emptyDescription: "",
+      deleted: "",
+      restoreSuccess: "",
+      restoreError: "",
+      restoreSelected: "",
+      deleteSuccess: "",
+      deleteError: "",
+      deleteSelected: "",
+      bulkRestoreSuccess: "",
+      bulkRestoreError: "",
+      bulkDeleteSuccess: "",
+      bulkDeleteError: "",
+      confirmDelete: "",
+      confirmBulkDelete: "",
+      noResults: "",
+      loadError: ""
     },
     all: undefined,
     date: undefined,
     name: undefined,
     newest: undefined,
     oldest: undefined,
-    status: undefined
+    status: undefined,
+    restore: "",
+    back: "",
+    expiresToday: "",
+    expiresInOneDay: "",
+    expiresInDays: "",
+    deletedOn: ""
   },
 };
 

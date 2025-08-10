@@ -3,18 +3,21 @@
 import { ThemeProvider } from "@/providers/theme-provider";
 import { LanguageProvider } from "@/contexts/language-context";
 import { PreferencesProvider } from "@/contexts/preferences-context";
+import { TrashProvider } from "@/contexts/trash-context";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PreferencesProvider>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
-        enableSystem
+        defaultTheme="dark"
+        enableSystem={false}
         disableTransitionOnChange
       >
         <LanguageProvider>
-          {children}
+          <TrashProvider>
+            {children}
+          </TrashProvider>
         </LanguageProvider>
       </ThemeProvider>
     </PreferencesProvider>
