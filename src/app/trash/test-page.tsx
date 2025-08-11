@@ -31,27 +31,34 @@ export default function TrashTestPage() {
 
   useEffect(() => {
     loadTestData();
-    
+
     const unsubscribe = TrashManager.onChange(loadTrash);
-    
+
     return () => {
       unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTestData = () => {
     const guests = GuestStorage.getGuests(true);
-    const testGuests = guests.filter(g => g.name.startsWith("Test Guest"));
+    const testGuests = guests.filter((g) => g.name.startsWith("Test Guest"));
     setTestGuests(testGuests);
     loadTrash();
     setIsLoading(false);
   };
 
-  const loadTrash = () => {
-    const trash = TrashManager.getTrash();
-    setTrashItems(trash);
-  };
+  const loadTrash = async () => {
+  const trash = await TrashManager.getTrash();
+  if (Array.isArray(trash) && trash.every((item): item is Guest => {
+    const guest = item as Guest;
+    return 'id' in guest && 'name' in guest && guest.id !== undefined && guest.name !== undefined;
+  })) {
+    setTrashItems(trash as Guest[]);
+  } else {
+    console.error('Data tidak sesuai dengan tipe Guest[]');
+  }
+};
 
   const createTestGuestHandler = () => {
     const id = Math.floor(Math.random() * 1000);
@@ -59,13 +66,13 @@ export default function TrashTestPage() {
       ...createTestGuest(id),
       id: `test-${Date.now()}-${id}`,
     };
-    
+
     GuestStorage.addGuest(newGuest);
     loadTestData();
   };
 
   const moveToTrash = (id: string) => {
-    TrashManager.moveToTrash(id, 'test-user');
+    TrashManager.moveToTrash(id, "test-user");
     loadTestData();
   };
 
@@ -75,14 +82,16 @@ export default function TrashTestPage() {
   };
 
   const deletePermanently = (id: string) => {
-    const guests = GuestStorage.getGuests(true).filter(g => g.id !== id);
+    const guests = GuestStorage.getGuests(true).filter((g) => g.id !== id);
     GuestStorage.saveGuests(guests);
     loadTestData();
   };
 
   const resetTestData = () => {
     const guests = GuestStorage.getGuests(true);
-    const filteredGuests = guests.filter(g => !g.name.startsWith("Test Guest"));
+    const filteredGuests = guests.filter(
+      (g) => !g.name.startsWith("Test Guest")
+    );
     GuestStorage.saveGuests(filteredGuests);
     loadTestData();
   };
@@ -108,17 +117,21 @@ export default function TrashTestPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Active Test Guests ({testGuests.length})</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Active Test Guests ({testGuests.length})
+            </h2>
             <div className="space-y-4">
               {testGuests.length === 0 ? (
                 <p className="text-muted-foreground">No active test guests</p>
               ) : (
-                testGuests.map(guest => (
+                testGuests.map((guest) => (
                   <div key={guest.id} className="border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
                         <h3 className="font-medium">{guest.name}</h3>
-                        <p className="text-sm text-muted-foreground">{guest.institution}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {guest.institution}
+                        </p>
                       </div>
                       <Button
                         variant="destructive"
@@ -136,12 +149,14 @@ export default function TrashTestPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-4">Trash ({trashItems.length})</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Trash ({trashItems.length})
+            </h2>
             <div className="space-y-4">
               {trashItems.length === 0 ? (
                 <p className="text-muted-foreground">Trash is empty</p>
               ) : (
-                trashItems.map(guest => (
+                trashItems.map((guest) => (
                   <TestTrashItem
                     key={guest.id}
                     guest={guest}
@@ -160,7 +175,10 @@ export default function TrashTestPage() {
         <ol className="list-decimal pl-5 space-y-2">
           <li>Click Create Test Guest to add a test guest</li>
           <li>Click Move to Trash to move a guest to the trash</li>
-          <li>Verify the guest appears in the Trash section with the correct expiration time</li>
+          <li>
+            Verify the guest appears in the Trash section with the correct
+            expiration time
+          </li>
           <li>Test restoring a guest from trash</li>
           <li>Test permanent deletion of a guest</li>
           <li>Use Reset Test Data to clean up after testing</li>

@@ -16,7 +16,7 @@ export class GuestStorage {
   }
   private static readonly TRASH_KEY = `${STORAGE_KEY}-trash`;
   private static readonly TAGS_KEY = `${STORAGE_KEY}-tags`;
-    static clearLocalStorage: any;
+    static clearLocalStorage: never;
 
   // Check if a guest with the same name and phone already exists
   static checkDuplicateGuest(name: string, phone: string, excludeId?: string): boolean {

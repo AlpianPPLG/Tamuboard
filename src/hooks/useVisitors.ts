@@ -102,6 +102,7 @@ export const useVisitors = () => {
       try {
         await updateVisitor(id, updates);
         // Clear the pending update on success
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [id]: _, ...rest } = pendingUpdates.current;
         pendingUpdates.current = rest;
       } catch (err) {

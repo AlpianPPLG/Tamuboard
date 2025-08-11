@@ -1,10 +1,8 @@
-"use client";
-
 import { useState, useEffect } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Database, Loader2 } from 'lucide-react';
-import { GuestStorage } from '@/lib/guest-stotrage';
+import { GuestStorage } from '@/lib/guest-storage';
 
 export function MigrationNotice() {
   const [showNotice, setShowNotice] = useState(false);
@@ -58,24 +56,11 @@ export function MigrationNotice() {
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isClearing ? (
-                <>
-                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                  Menghapus...
-                </>
+                <Loader2 className="animate-spin" />
               ) : (
-                <>
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Hapus Data Lama
-                </>
+                <CheckCircle className="h-4 w-4" />
               )}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setShowNotice(false)}
-              className="border-blue-300 text-blue-700 hover:bg-blue-100"
-            >
-              Nanti Saja
+              Hapus Data Lama
             </Button>
           </div>
         </AlertDescription>
