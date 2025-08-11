@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Timestamp } from 'firebase/firestore';
 import { Visitor, CreateVisitorDTO } from '@/types/visitor';
+import { useTheme } from '@/hooks/useTheme';
 
 interface VisitorFormProps {
   initialData?: Visitor;
@@ -30,8 +31,10 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({
     institution: initialData?.institution || '',
     guestCategory: initialData?.guestCategory || 'regular',
     checkIn: initialData?.checkIn || new Date(),
+    keperluan: initialData?.keperluan || '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { inputTextColor, inputBgColor, inputBorderColor, inputFocusBorderColor } = useTheme();
 
   // Helper function to safely convert to Date
   const toDate = (date: Date | Timestamp | string): Date => {
@@ -137,13 +140,30 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({
           value={formData.fullName}
           onChange={handleChange}
           className={`mt-1 block w-full rounded-md border ${
-            errors.fullName ? 'border-red-500' : 'border-gray-300'
-          } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2`}
+            errors.fullName ? 'border-red-500' : inputBorderColor
+          } shadow-sm focus:ring-blue-500 sm:text-sm p-2 ${inputTextColor} ${inputBgColor} ${
+            errors.fullName ? 'focus:border-red-500' : inputFocusBorderColor
+          }`}
           placeholder="Enter full name"
         />
         {errors.fullName && (
           <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
         )}
+      </div>
+
+      <div>
+        <label htmlFor="keperluan" className="block text-sm font-medium text-gray-700">
+          Keperluan
+        </label>
+        <input
+          type="text"
+          id="keperluan"
+          name="keperluan"
+          value={formData.keperluan || ''}
+          onChange={handleChange}
+          className={`mt-1 block w-full rounded-md border ${inputBorderColor} shadow-sm focus:ring-blue-500 sm:text-sm p-2 ${inputTextColor} ${inputBgColor} ${inputFocusBorderColor}`}
+          placeholder="Contoh: Bekerja, Meeting, Kunjungan, dll."
+        />
       </div>
 
       <div>
@@ -157,8 +177,10 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({
           value={formData.email}
           onChange={handleChange}
           className={`mt-1 block w-full rounded-md border ${
-            errors.email ? 'border-red-500' : 'border-gray-300'
-          } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2`}
+            errors.email ? 'border-red-500' : inputBorderColor
+          } shadow-sm focus:ring-blue-500 sm:text-sm p-2 ${inputTextColor} ${inputBgColor} ${
+            errors.email ? 'focus:border-red-500' : inputFocusBorderColor
+          }`}
           placeholder="Enter email"
         />
         {errors.email && (
@@ -177,8 +199,10 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({
           value={formData.institution}
           onChange={handleChange}
           className={`mt-1 block w-full rounded-md border ${
-            errors.institution ? 'border-red-500' : 'border-gray-300'
-          } shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2`}
+            errors.institution ? 'border-red-500' : inputBorderColor
+          } shadow-sm focus:ring-blue-500 sm:text-sm p-2 ${inputTextColor} ${inputBgColor} ${
+            errors.institution ? 'focus:border-red-500' : inputFocusBorderColor
+          }`}
           placeholder="Enter institution"
         />
         {errors.institution && (
@@ -195,7 +219,7 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({
           name="guestCategory"
           value={formData.guestCategory}
           onChange={handleChange}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+          className={`mt-1 block w-full rounded-md border ${inputBorderColor} py-2 px-3 shadow-sm focus:outline-none focus:ring-blue-500 sm:text-sm ${inputTextColor} ${inputBgColor} ${inputFocusBorderColor}`}
         >
           <option value="regular">Regular</option>
           <option value="vip">VIP</option>
@@ -212,7 +236,7 @@ export const VisitorForm: React.FC<VisitorFormProps> = ({
           name="checkIn"
           value={toDate(formData.checkIn).toISOString().slice(0, 16)}
           onChange={(e) => handleDateChange(new Date(e.target.value))}
-          className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+          className={`mt-1 block w-full rounded-md border ${inputBorderColor} shadow-sm focus:ring-blue-500 sm:text-sm p-2 ${inputTextColor} ${inputBgColor} ${inputFocusBorderColor}`}
         />
       </div>
 

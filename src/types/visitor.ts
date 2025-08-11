@@ -16,12 +16,13 @@ export interface Visitor {
   // Additional fields from Guest
   phone?: string;
   purpose?: string;
+  keperluan?: string;  // For tracking the specific purpose/need of the visit
   visitTime?: 'morning' | 'afternoon' | 'evening';
   scheduledDate?: Timestamp | Date | null;
   scheduledTime?: string;
   feedback?: string;
   rating?: number;
-  status?: 'checked-in' | 'checked-out' | 'deleted';
+  status?: 'checked-in' | 'checked-out' | 'deleted' | 'scheduled' | 'cancelled';
   notes?: string;
   avatar?: string;
   tags?: string[];

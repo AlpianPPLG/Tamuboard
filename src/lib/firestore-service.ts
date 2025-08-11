@@ -19,6 +19,16 @@ import { Visitor, CreateVisitorDTO, UpdateVisitorDTO } from '@/types/visitor';
 
 const VISITORS_COLLECTION = 'visitors';
 
+// Helper function to safely convert Firestore Timestamp to Date
+const toSafeDate = (value: any): Date | undefined => {
+  if (!value) return undefined;
+  if (value instanceof Date) return value;
+  if (value.toDate) return value.toDate();
+  if (typeof value === 'string' || typeof value === 'number') return new Date(value);
+  console.warn('Unsupported date format:', value);
+  return undefined;
+};
+
 // Convert Firestore data to Visitor
 export const toVisitor = (doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>): Visitor => {
   const data = doc.data();
@@ -31,30 +41,38 @@ export const toVisitor = (doc: DocumentSnapshot<DocumentData> | QueryDocumentSna
     throw new Error(`Missing required fields in document ${doc.id}`);
   }
 
+  // Safely handle dates
+  const checkIn = toSafeDate(data.checkIn);
+  const checkOutTime = toSafeDate(data.checkOutTime);
+  const deletedAt = toSafeDate(data.deletedAt);
+  const createdAt = toSafeDate(data.createdAt) || new Date();
+  const updatedAt = toSafeDate(data.updatedAt) || new Date();
+  const scheduledDate = toSafeDate(data.scheduledDate);
+  const reminderSentAt = toSafeDate(data.reminderSentAt);
+
+  if (!checkIn) {
+    throw new Error(`Invalid checkIn date in document ${doc.id}`);
+  }
+
   return {
     id: doc.id,
     fullName: data.fullName as string,
     email: data.email as string,
     institution: data.institution as string,
     guestCategory: data.guestCategory as 'regular' | 'vip' | 'supplier' | 'intern',
-    checkIn: data.checkIn?.toDate(),
-    checkOutTime: data.checkOutTime?.toDate(),
-    createdAt: data.createdAt?.toDate(),
-    updatedAt: data.updatedAt?.toDate(),
-    deletedAt: data.deletedAt?.toDate(),
-    // Optional fields with type assertions
     phone: data.phone as string | undefined,
     purpose: data.purpose as string | undefined,
-    visitTime: data.visitTime as 'morning' | 'afternoon' | 'evening' | undefined,
-    scheduledDate: data.scheduledDate?.toDate(),
-    scheduledTime: data.scheduledTime as string | undefined,
-    feedback: data.feedback as string | undefined,
-    rating: data.rating as number | undefined,
-    status: data.status as 'checked-in' | 'checked-out' | 'deleted' | undefined,
+    checkIn,
+    checkOutTime,
+    deletedAt,
+    createdAt,
+    updatedAt,
     notes: data.notes as string | undefined,
-    avatar: data.avatar as string | undefined,
-    tags: data.tags as string[] | undefined,
-    specialRequirements: data.specialRequirements as Array<{ type: string; description: string }> | undefined,
+    scheduledDate,
+    scheduledTime: data.scheduledTime as string | undefined,
+    status: (data.status as 'checked-in' | 'checked-out' | 'scheduled' | 'cancelled' | 'deleted') || 'checked-in',
+    rating: data.rating as number | undefined,
+    feedback: data.feedback as string | undefined,
     autoCheckoutReminder: data.autoCheckoutReminder as boolean | undefined,
     reminderSettings: data.reminderSettings as {
       enabled: boolean;
@@ -63,11 +81,15 @@ export const toVisitor = (doc: DocumentSnapshot<DocumentData> | QueryDocumentSna
       autoCheckoutAfter: number;
       notificationMethods: ('system' | 'email' | 'sms')[];
     } | undefined,
-    reminderSentAt: data.reminderSentAt?.toDate(),
+    reminderSentAt,
     expectedDuration: data.expectedDuration as {
       duration: number;
       unit: 'minutes' | 'hours';
     } | undefined,
+    visitTime: data.visitTime as 'morning' | 'afternoon' | 'evening' | undefined,
+    avatar: data.avatar as string | undefined,
+    tags: data.tags as string[] | undefined,
+    specialRequirements: data.specialRequirements as Array<{ type: string; description: string }> | undefined,
   };
 };
 

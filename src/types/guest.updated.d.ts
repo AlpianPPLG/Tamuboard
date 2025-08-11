@@ -5,6 +5,7 @@ export interface Guest {
   name: string;
   institution: string;
   purpose: string;
+  keperluan?: string;  // For tracking the specific purpose/need of the visit
   phone: string;
   email?: string;
   category: 'VIP' | 'regular' | 'supplier' | 'intern';
@@ -82,6 +83,7 @@ export interface GuestFormData {
   name: string;
   institution: string;
   purpose: string;
+  keperluan?: string;  // Added keperluan field to form data
   phone: string;
   email?: string;
   category: 'VIP' | 'regular' | 'supplier' | 'intern';
@@ -94,6 +96,7 @@ export interface FeedbackData {
   rating: number;
   feedback: string;
 }
+
 export interface GuestStats {
   totalToday: number;
   totalThisMonth: number;

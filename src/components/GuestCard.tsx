@@ -36,9 +36,14 @@ export const GuestCard = ({ visitor, onEdit, onDelete, isDeleting = false }: Gue
               {visitor.fullName.charAt(0).toUpperCase()}
             </div>
           </div>
-          <div className="ml-4">
+          <div className="ml-4 flex-1">
             <h3 className="text-lg font-medium text-gray-900">{visitor.fullName}</h3>
             <p className="text-sm text-gray-500">{visitor.institution}</p>
+            {visitor.keperluan && (
+              <p className="mt-1 text-sm text-gray-600">
+                <span className="font-medium">Keperluan:</span> {visitor.keperluan}
+              </p>
+            )}
           </div>
           <div className="ml-auto">
             <div className="relative">

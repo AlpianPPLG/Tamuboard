@@ -409,10 +409,21 @@ export class GuestStorage {
     };
   }
   public static clearLocalStorage(): void {
-    // kode untuk membersihkan localStorage
-    localStorage.removeItem("buku-tamu-guests");
-    localStorage.removeItem("savedFilters");
-    localStorage.removeItem("reminderSettings");
+    if (typeof window === 'undefined') return;
+    
+    try {
+      // Clear all relevant localStorage items
+      localStorage.removeItem("buku-tamu-guests");
+      localStorage.removeItem("savedFilters");
+      localStorage.removeItem("reminderSettings");
+      localStorage.removeItem("buku-tamu-guests-tags");
+      localStorage.removeItem("buku-tamu-guests-trash");
+      
+      console.log('LocalStorage cleared successfully');
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+      throw error; // Re-throw to be caught by the caller
+    }
   }
 }
 

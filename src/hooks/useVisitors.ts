@@ -1,59 +1,82 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { 
+  collection, 
+  query, 
+  where, 
+  orderBy, 
+  getDocs, 
+  limit, 
+  startAfter,
+  DocumentData,
+  QueryDocumentSnapshot,
+  getCountFromServer
+} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { createVisitor, updateVisitor, toVisitor, hardDeleteVisitor, deleteVisitor } from '@/lib/firestore-service';
 import { Visitor, CreateVisitorDTO, UpdateVisitorDTO } from '@/types/visitor';
+
+export const VISITORS_PER_PAGE = 20;
 
 export const useVisitors = () => {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
-  const [deletedVisitor, setDeletedVisitor] = useState<{ visitor: Visitor | null; undo: (() => void) | null }>({ 
-    visitor: null, 
-    undo: null 
+  const [deletedVisitor, setDeletedVisitor] = useState<{
+    visitor: Visitor | null;
+    undo: (() => void) | null;
+  }>({
+    visitor: null,
+    undo: null
   });
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingUpdates = useRef<Record<string, Partial<Visitor>>>({});
   const updateTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const firstDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
 
-  // Real-time listener for visitors collection
-  useEffect(() => {
-    setLoading(true);
-    
-    const q = query(
-      collection(db, 'visitors'),
-      where('deletedAt', '==', null),
-      orderBy('createdAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const updatedVisitors = snapshot.docs.map(doc => toVisitor(doc));
-        
-        // Apply any pending optimistic updates
-        const visitorsWithOptimisticUpdates = updatedVisitors.map(visitor => ({
-          ...visitor,
-          ...(pendingUpdates.current[visitor.id!] || {})
-        }));
-        
-        setVisitors(visitorsWithOptimisticUpdates);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error fetching visitors:', err);
-        setError(err as Error);
-        setLoading(false);
+  // Load all active visitors at once
+  const loadVisitors = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Query to get all active visitors
+      const q = query(
+        collection(db, 'visitors'),
+        where('deletedAt', '==', null),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const allVisitors = querySnapshot.docs.map(doc => toVisitor(doc));
+      
+      // Update state with all visitors
+      setVisitors(allVisitors);
+      setTotalItems(allVisitors.length);
+      setTotalPages(1);
+      setCurrentPage(1);
+      
+      // Update document references (though not needed for pagination anymore)
+      if (querySnapshot.docs.length > 0) {
+        firstDocRef.current = querySnapshot.docs[0];
+        lastDocRef.current = querySnapshot.docs[querySnapshot.docs.length - 1];
       }
-    );
-
-    return () => {
-      unsubscribe();
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (updateTimeout.current) clearTimeout(updateTimeout.current);
-    };
+    } catch (err) {
+      console.error('Error loading visitors:', err);
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+  
+  // Load initial data
+  useEffect(() => {
+    loadVisitors();
+  }, [loadVisitors]);
 
   // Optimistically add a visitor
   const addVisitor = useCallback(async (data: CreateVisitorDTO): Promise<Visitor> => {
@@ -186,14 +209,132 @@ export const useVisitors = () => {
     }
   }, []);
 
+  // Function to get all visitors including deleted ones with pagination
+  const getAllVisitors = useCallback(async (startAfterDoc: QueryDocumentSnapshot<DocumentData> | null = null, limitCount: number = VISITORS_PER_PAGE) => {
+    try {
+      setIsLoadingMore(!!startAfterDoc);
+      
+      let q = query(
+        collection(db, 'visitors'),
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
+      );
+      
+      if (startAfterDoc) {
+        q = query(q, startAfter(startAfterDoc));
+      }
+      
+      const querySnapshot = await getDocs(q);
+      const allVisitors = querySnapshot.docs.map(doc => toVisitor(doc));
+      
+      return {
+        visitors: allVisitors,
+        lastVisible: querySnapshot.docs[querySnapshot.docs.length - 1] || null,
+        hasMore: querySnapshot.docs.length === limitCount
+      };
+    } catch (err) {
+      console.error('Error fetching all visitors:', err);
+      setError(err as Error);
+      return { visitors: [], lastVisible: null, hasMore: false };
+    } finally {
+      setIsLoadingMore(false);
+      if (!startAfterDoc) {
+        setLoading(false);
+      }
+    }
+  }, []);
+  
+  // Function to load more visitors (for pagination)
+  const loadMoreVisitors = useCallback(async (lastVisible: QueryDocumentSnapshot<DocumentData> | null) => {
+    if (!lastVisible) return { visitors: [], lastVisible: null, hasMore: false };
+    
+    try {
+      const q = query(
+        collection(db, 'visitors'),
+        where('deletedAt', '==', null),
+        orderBy('createdAt', 'desc'),
+        startAfter(lastVisible),
+        limit(VISITORS_PER_PAGE)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const newVisitors = querySnapshot.docs.map(doc => toVisitor(doc));
+      const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+      
+      return {
+        visitors: newVisitors,
+        lastVisible: newLastVisible,
+        hasMore: !querySnapshot.empty
+      };
+    } catch (err) {
+      console.error('Error loading more visitors:', err);
+      setError(err as Error);
+      return { visitors: [], lastVisible: null, hasMore: false };
+    }
+  }, []);
+  
+  // Function to refresh visitors
+  const refreshVisitors = useCallback(async () => {
+    await loadVisitors();
+  }, [loadVisitors]);
+
+  // Handle page change - no longer needed for active tab, but keeping for compatibility
+  const handlePageChange = useCallback((page: number) => {
+    // Only update page state, actual data is loaded all at once
+    setCurrentPage(page);
+  }, []);
+
+  // Handle delete with undo
+  const handleDeleteWithUndo = useCallback(async (visitorId: string) => {
+    try {
+      setLoading(true);
+      await deleteVisitor(visitorId);
+      
+      // Show undo notification
+      const undo = async () => {
+        await updateVisitor(visitorId, { deletedAt: null });
+        await loadVisitors();
+      };
+      
+      // Find the visitor object to store in deletedVisitor
+      const visitorToDelete = visitors.find(v => v.id === visitorId);
+      if (visitorToDelete) {
+        setDeletedVisitor({ visitor: visitorToDelete, undo });
+      }
+      
+      // Reset after 5 seconds
+      setTimeout(() => {
+        setDeletedVisitor({ visitor: null, undo: null });
+      }, 5000);
+      
+      // Refresh the visitors list
+      await loadVisitors();
+    } catch (err) {
+      console.error('Error deleting visitor:', err);
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, loadVisitors]);
+
   return {
     visitors,
     loading,
-    error: error || null,
-    addVisitor: addVisitor || (() => Promise.reject(new Error('addVisitor not initialized'))),
-    updateVisitor: updateVisitorOptimistic || (() => Promise.reject(new Error('updateVisitor not initialized'))),
-    deleteVisitor: deleteVisitorWithUndo || (() => Promise.reject(new Error('deleteVisitor not initialized'))),
-    permanentDelete: permanentDelete || (() => Promise.reject(new Error('permanentDelete not initialized'))),
+    error,
+    addVisitor,
+    updateVisitor: updateVisitorOptimistic,
+    deleteVisitor: handleDeleteWithUndo,
+    permanentDelete,
     deletedVisitor,
+    getAllVisitors,
+    loadMoreVisitors,
+    refreshVisitors,
+    currentPage,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    isLoadingMore,
+    hasMore: !!lastDocRef.current,
+    VISITORS_PER_PAGE,
   };
 };

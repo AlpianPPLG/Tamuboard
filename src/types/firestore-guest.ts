@@ -17,10 +17,11 @@ export interface FirestoreGuest {
   notes: string;
   phone: string;
   purpose: string;
+  keperluan?: string;  // For tracking the specific purpose/need of the visit
   rating: number;
   scheduledDate: Timestamp | null;
   scheduledTime: string;
-  status: 'checked-in' | 'checked-out' | 'deleted';
+  status: 'checked-in' | 'checked-out' | 'deleted' | 'scheduled' | 'cancelled';
   tags: string[];
   updatedAt: Timestamp;
   visitTime: 'morning' | 'afternoon' | 'evening';
@@ -50,6 +51,7 @@ export function firestoreToGuest(firestoreGuest: FirestoreGuest & { id: string }
       undefined,
     status: firestoreGuest.status,
     notes: firestoreGuest.notes || undefined,
+    keperluan: firestoreGuest.keperluan || undefined,
     tags: firestoreGuest.tags || [],
     deletedAt: firestoreGuest.deletedAt?.toDate(),
     deletedBy: firestoreGuest.deletedBy || undefined,
@@ -91,6 +93,7 @@ export function guestToFirestore(guest: import('@/types/guest').Guest): Omit<Fir
     notes: guest.notes || '',
     phone: guest.phone,
     purpose: guest.purpose,
+    keperluan: guest.keperluan,
     rating: guest.rating || 0,
     scheduledDate: guest.scheduledDate ? Timestamp.fromDate(new Date(guest.scheduledDate)) : null,
     scheduledTime: guest.scheduledTime || '',
