@@ -320,7 +320,7 @@ export default function TrashPage() {
                               onClick={() => handlePermanentDelete(guest.id)}
                               className="text-xs sm:text-sm flex-1 sm:flex-initial"
                             >
-                              <Trash2 className="h-3 w-3 mr-1" /> {t.trash.deletePermanent}
+                              <Trash2 className="h-3 w-3 mr-1" /> {t.trash.deletePermanently}
                             </Button>
                           </div>
                         </div>

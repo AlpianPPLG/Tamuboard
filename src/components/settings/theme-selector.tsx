@@ -2,7 +2,6 @@
 
 import { useAppPreferences } from '@/hooks/use-preferences';
 import { Moon, Monitor, Sun } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 type ThemeOption = {

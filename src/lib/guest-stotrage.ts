@@ -11,7 +11,7 @@ type StoredGuest = Omit<Guest, 'visitDate'> & { visitDate: string };
 
 // Kelas untuk mengelola data tamu  
 export class GuestStorage {
-  static onGuestsChange(arg0: (updatedGuests: any) => void) {
+  static onGuestsChange() {
     throw new Error('Method not implemented.');
   }
   private static readonly TRASH_KEY = `${STORAGE_KEY}-trash`;

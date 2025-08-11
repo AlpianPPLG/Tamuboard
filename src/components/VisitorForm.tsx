@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Timestamp } from 'firebase/firestore';
-import { Visitor, CreateVisitorDTO, UpdateVisitorDTO } from '@/types/visitor';
+import { Visitor, CreateVisitorDTO } from '@/types/visitor';
 
 interface VisitorFormProps {
   initialData?: Visitor;
@@ -10,8 +10,12 @@ interface VisitorFormProps {
 }
 
 // Add type guard for Timestamp
-const isTimestamp = (value: any): value is Timestamp => {
-  return value && typeof value.toDate === 'function';
+const isTimestamp = (value: unknown): value is Timestamp => {
+  return value !== null && 
+         typeof value === 'object' && 
+         value !== undefined && 
+         'toDate' in value && 
+         typeof (value as Timestamp).toDate === 'function';
 };
 
 export const VisitorForm: React.FC<VisitorFormProps> = ({
