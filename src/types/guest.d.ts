@@ -18,6 +18,7 @@ export interface Guest {
   checkOutTime?: string;
   status: 'checked-in' | 'checked-out' | 'deleted' | 'scheduled' | 'cancelled';
   notes?: string;
+  keperluan?: string; // Specific need/purpose of the visit
   avatar?: string;
   privacySettings?: PrivacySettings;
   specialRequirements?: SpecialRequirement[];

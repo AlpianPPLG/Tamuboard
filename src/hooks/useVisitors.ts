@@ -8,8 +8,7 @@ import {
   limit, 
   startAfter,
   DocumentData,
-  QueryDocumentSnapshot,
-  getCountFromServer
+  QueryDocumentSnapshot
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { createVisitor, updateVisitor, toVisitor, hardDeleteVisitor, deleteVisitor } from '@/lib/firestore-service';
@@ -33,7 +32,6 @@ export const useVisitors = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingUpdates = useRef<Record<string, Partial<Visitor>>>({});
   const updateTimeout = useRef<NodeJS.Timeout | null>(null);
   const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
@@ -151,48 +149,7 @@ export const useVisitors = () => {
     debouncedUpdate(id, updates);
   }, [debouncedUpdate]);
 
-  // Delete visitor with undo option
-  const deleteVisitorWithUndo = useCallback(async (id: string): Promise<void> => {
-    const visitorToDelete = visitors.find(v => v.id === id);
-    if (!visitorToDelete) return;
-
-    // Optimistic update
-    setVisitors(prev => prev.filter(v => v.id !== id));
-
-    // Store the deleted visitor for potential undo
-    const undo = async () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        setDeletedVisitor({ visitor: null, undo: null });
-        
-        // Re-add the visitor
-        setVisitors(prev => [visitorToDelete, ...prev]);
-        
-        // Update Firestore to remove the deletedAt field
-        await updateVisitor(visitorToDelete.id!, { deletedAt: null } as UpdateVisitorDTO);
-      }
-    };
-
-    // Set timeout for undo (5 seconds)
-    setDeletedVisitor({ visitor: visitorToDelete, undo });
-    
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    timeoutRef.current = setTimeout(async () => {
-      try {
-        // After timeout, perform the actual delete
-        await deleteVisitor(id);
-        setDeletedVisitor({ visitor: null, undo: null });
-      } catch (err) {
-        console.error('Error deleting visitor:', err);
-        // On error, revert the optimistic update
-        setVisitors(prev => [visitorToDelete, ...prev]);
-      }
-    }, 5000);
-
-  }, [visitors]);
+  // Note: Removed unused deleteVisitorWithUndo function as it was not being used
 
   // Permanently delete a visitor (no undo)
   const permanentDelete = useCallback(async (id: string): Promise<void> => {
@@ -280,42 +237,49 @@ export const useVisitors = () => {
 
   // Handle page change - no longer needed for active tab, but keeping for compatibility
   const handlePageChange = useCallback((page: number) => {
-    // Only update page state, actual data is loaded all at once
     setCurrentPage(page);
+    // No need to load data here as we're loading all visitors at once
   }, []);
 
   // Handle delete with undo
   const handleDeleteWithUndo = useCallback(async (visitorId: string) => {
     try {
       setLoading(true);
-      await deleteVisitor(visitorId);
+      
+      // Find the visitor object first
+      const visitorToDelete = visitors.find(v => v.id === visitorId);
+      if (!visitorToDelete) return;
+      
+      // Optimistic update
+      setVisitors(prev => prev.filter(v => v.id !== visitorId));
       
       // Show undo notification
       const undo = async () => {
         await updateVisitor(visitorId, { deletedAt: null });
-        await loadVisitors();
+        setVisitors(prev => [visitorToDelete, ...prev]);
       };
       
-      // Find the visitor object to store in deletedVisitor
-      const visitorToDelete = visitors.find(v => v.id === visitorId);
-      if (visitorToDelete) {
-        setDeletedVisitor({ visitor: visitorToDelete, undo });
-      }
+      setDeletedVisitor({ visitor: visitorToDelete, undo });
       
       // Reset after 5 seconds
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         setDeletedVisitor({ visitor: null, undo: null });
       }, 5000);
       
-      // Refresh the visitors list
-      await loadVisitors();
+      // Actual delete operation
+      await deleteVisitor(visitorId);
+      
+      // Clear timeout if the component unmounts
+      return () => clearTimeout(timeoutId);
     } catch (err) {
       console.error('Error deleting visitor:', err);
       setError(err as Error);
+      // Revert optimistic update on error
+      setVisitors(prev => [...prev]);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, loadVisitors]);
+  }, [visitors]);
 
   return {
     visitors,

@@ -20,10 +20,12 @@ import { Visitor, CreateVisitorDTO, UpdateVisitorDTO } from '@/types/visitor';
 const VISITORS_COLLECTION = 'visitors';
 
 // Helper function to safely convert Firestore Timestamp to Date
-const toSafeDate = (value: any): Date | undefined => {
+type DateInput = Date | { toDate: () => Date } | string | number | null | undefined;
+
+const toSafeDate = (value: DateInput): Date | undefined => {
   if (!value) return undefined;
   if (value instanceof Date) return value;
-  if (value.toDate) return value.toDate();
+  if (typeof value === 'object' && 'toDate' in value) return value.toDate();
   if (typeof value === 'string' || typeof value === 'number') return new Date(value);
   console.warn('Unsupported date format:', value);
   return undefined;
