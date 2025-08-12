@@ -41,24 +41,44 @@ export const useVisitors = () => {
   const loadVisitors = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('Loading visitors from Firestore...');
       
-      // Query to get all active visitors
-      const q = query(
+      // First try to get all visitors without any filters to debug
+      const allVisitorsQuery = query(
         collection(db, 'visitors'),
-        where('deletedAt', '==', null),
         orderBy('createdAt', 'desc')
       );
       
-      const querySnapshot = await getDocs(q);
-      const allVisitors = querySnapshot.docs.map(doc => toVisitor(doc));
+      console.log('Firestore query created, executing...');
+      const querySnapshot = await getDocs(allVisitorsQuery);
+      console.log(`Found ${querySnapshot.docs.length} documents in Firestore`);
       
-      // Update state with all visitors
-      setVisitors(allVisitors);
-      setTotalItems(allVisitors.length);
+      // Log the first few documents for debugging
+      querySnapshot.docs.slice(0, 3).forEach((doc, index) => {
+        console.log(`Document ${index + 1}:`, { id: doc.id, data: doc.data() });
+      });
+      
+      const allVisitors = querySnapshot.docs.map(doc => {
+        try {
+          return toVisitor(doc);
+        } catch (err) {
+          console.error(`Error converting document ${doc.id} to Visitor:`, err);
+          return null;
+        }
+      }).filter(Boolean) as Visitor[];
+      
+      console.log(`Successfully loaded ${allVisitors.length} visitors`);
+      
+      // Filter out deleted visitors
+      const activeVisitors = allVisitors.filter(v => !v.deletedAt);
+      
+      // Update state with active visitors
+      setVisitors(activeVisitors);
+      setTotalItems(activeVisitors.length);
       setTotalPages(1);
       setCurrentPage(1);
       
-      // Update document references (though not needed for pagination anymore)
+      // Update document references
       if (querySnapshot.docs.length > 0) {
         firstDocRef.current = querySnapshot.docs[0];
         lastDocRef.current = querySnapshot.docs[querySnapshot.docs.length - 1];

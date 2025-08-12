@@ -35,26 +35,36 @@ const toSafeDate = (value: DateInput): Date | undefined => {
 export const toVisitor = (doc: DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>): Visitor => {
   const data = doc.data();
   if (!data) {
+    console.error(`No data found for document ${doc.id}`);
     throw new Error(`No data found for document ${doc.id}`);
   }
   
-  // Ensure required fields are present
-  if (!data.fullName || !data.email || !data.institution || !data.guestCategory || !data.checkIn) {
-    throw new Error(`Missing required fields in document ${doc.id}`);
+  // Log document data for debugging
+  console.log(`Processing document ${doc.id}:`, data);
+  
+  // Handle missing required fields with defaults
+  if (!data.fullName) {
+    console.warn(`Document ${doc.id} is missing fullName, using 'Unknown'`);
   }
-
-  // Safely handle dates
-  const checkIn = toSafeDate(data.checkIn);
-  const checkOutTime = toSafeDate(data.checkOutTime);
-  const deletedAt = toSafeDate(data.deletedAt);
-  const createdAt = toSafeDate(data.createdAt) || new Date();
-  const updatedAt = toSafeDate(data.updatedAt) || new Date();
-  const scheduledDate = toSafeDate(data.scheduledDate);
-  const reminderSentAt = toSafeDate(data.reminderSentAt);
-
-  if (!checkIn) {
-    throw new Error(`Invalid checkIn date in document ${doc.id}`);
+  if (!data.email) {
+    console.warn(`Document ${doc.id} is missing email, using 'no-email@example.com'`);
   }
+  if (!data.institution) {
+    console.warn(`Document ${doc.id} is missing institution, using 'Unknown'`);
+  }
+  if (!data.guestCategory) {
+    console.warn(`Document ${doc.id} is missing guestCategory, defaulting to 'regular'`);
+  }
+  
+  // Safely handle dates with fallbacks
+  const now = new Date();
+  const checkIn = toSafeDate(data.checkIn) || now;
+  const checkOutTime = toSafeDate(data.checkOutTime) || null;
+  const deletedAt = toSafeDate(data.deletedAt) || null;
+  const createdAt = toSafeDate(data.createdAt) || now;
+  const updatedAt = toSafeDate(data.updatedAt) || now;
+  const scheduledDate = toSafeDate(data.scheduledDate) || null;
+  const reminderSentAt = toSafeDate(data.reminderSentAt) || null;
 
   return {
     id: doc.id,
